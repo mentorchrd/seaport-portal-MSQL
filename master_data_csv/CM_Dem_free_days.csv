@@ -1,0 +1,12 @@
+﻿demfrcode,DemTypeCargoType,OprType,FreeDays,UOM
+DMF0101,Import other than direct delivery,import,7,days
+DMF0102,cargo sold in auction,import,7,days
+DMF0201,cars through Ro Ro vessels,export,20,days
+DMF0202,All cargo othern than cars,export,30,days
+DMF0203,shut out cargo,export,7,days
+DMF0300,salvaged goods,export,7,days
+DMF0400,transhipment cargo,export,21,days
+DMF0500,sludge oil,export,3,days
+DMF0600,import direct delivery,import,3,shifts
+DMF0710,container ,both,3,days
+DMF0720,container - transhipment- ICD,both,15,days

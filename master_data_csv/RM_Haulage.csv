@@ -1,0 +1,13 @@
+﻿Haulage_description,category,H_Rate,H_UOM
+Loaded Wagon,non_Container,36,ton
+Empty Wagon used as dummy,non_Container,128,wagon
+Additional Operations,non_Container,0,wagon
+Loaded Wagon,20ft_Container,128,teu
+Empty Wagon used as dummy,20ft_Container,63.59,wagon
+Additional Operations,20ft_Container,255,wagon
+Loaded Wagon,40ft_Container,255,teu
+Empty Wagon used as dummy,40ft_Container,63.59,wagon
+Additional Operations,40ft_Container,255,wagon
+Loaded Wagon,Above 40ft_Container,382,teu
+Empty Wagon used as dummy,Above 40ft_Container,63.59,wagon
+Additional Operations,Above 40ft_Container,255,wagon

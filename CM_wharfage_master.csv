@@ -41,3 +41,14 @@ sor_item,Commodity_GenricName,Cost_basis,coastal_rate,L_Max,foreign_rate,F_Max,T
 3.1.1.36,Wood and Wood-Based Products,Weight,80.08,,48.06,,Both
 3.1.1.37-A,OtherCargo-In Bulk,Weight,96.5,,57.9,,Both
 3.1.1.37-B,OtherCargo-Other than in Bulk,Value,0.425,,0.255,,Both
+3.1.2.A.1.a,Container-Empty-20 ft,Unit,75,,127,,Both
+3.1.2.A.1.b,Container-Empty-40 ft,Unit,113,,190,,Both
+3.1.2.A.1.c,Container-Empty-above 40 ft ,Unit,151,,253,,Both
+3.1.2.A.2.a,Container-Laden-20 ft,Unit,750,,1252,,Both
+3.1.2.A.2.b,Container-Laden-40 ft,Unit,1126,,1878,,Both
+3.1.2.A.2.c,Container-Laden-Above 420 ft,Unit,1500,,2503,,Both
+3.1.2.B,Shipper Own Containers,Value,0.255,,0.425,,Both
+3.1.2.C.1.a,MAFI - 20 ft,Unit,76,,127,,Both
+3.1.2.C.1.b,MAFI - 40 ft,Unit,113,,190,,Both
+3.1.2.C.1.c,MAFI - Above 60 ft,Unit,151,,253,,Both
+3.1.2.C.2,Cargo Loaded on MAFI,Unit,151,,253,,Both

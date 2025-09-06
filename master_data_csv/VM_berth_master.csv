@@ -1,0 +1,28 @@
+﻿Berth_ID,BerthName,Liquid_Bulk,Container,POL,Bulk,RORO,PassnCruise,Bunker,Rated_Cap,Desired_Cap,Draft,Quay_Len,Dock_Name,Facility
+1,19A-NQ,yes,null,null,yes,null,null,null,1,0.7,8.5,198,DRAMBEDKAR DOCK,OPENPAVED
+2,18A-WQ-1,yes,null,null,yes,yes,null,null,1.4,0.9,11,170.6,DRAMBEDKAR DOCK,OPENPAVED
+3,17A-WQ-2,yes,null,null,yes,yes,null,null,2.5,1,12,170.6,DRAMBEDKAR DOCK,OPENPAVED
+4,16A-CB,null,null,null,yes,yes,yes,null,2.2,1.5,12,170.6,DRAMBEDKAR DOCK,TRANSITSHED
+5,15A-WQ-III,null,null,null,yes,yes,yes,null,2.7,1.9,12,170.6,DRAMBEDKAR DOCK,TRANSITSHED
+6,14A-WQ-IV,null,null,null,yes,yes,yes,null,2.7,1.9,11,170.6,DRAMBEDKAR DOCK,TRANSITSHED
+7,13A-SQ-I,null,null,null,yes,null,null,null,2.6,1.8,9.5,246.6,DRAMBEDKAR DOCK,OPENPAVED
+8,6A-SQ-II,yes,null,null,yes,null,null,null,1.4,1,9.5,179,DRAMBEDKAR DOCK,TANKFARMS
+9,12J-JD-1,null,null,null,yes,null,null,null,4.2,2.9,12.5,218.33,JAWAHAR DOCK,TRANSITSHED
+10,11J-JD-3,null,null,null,yes,null,null,null,4.3,3,13,218.33,JAWAHAR DOCK,TRANSITSHED
+11,10J-JD-5,null,null,null,yes,null,null,null,3.1,2.2,13,218.33,JAWAHAR DOCK,TRANSITSHED
+12,7J-JD-2,yes,null,null,yes,null,null,null,4.8,3.1,14,218.33,JAWAHAR DOCK,TANKFARMS
+13,8J-JD-4,yes,null,null,yes,null,null,null,2,1.3,14,218.33,JAWAHAR DOCK,TANKFARMS
+14,9J-JD-6,yes,null,null,yes,null,null,null,3.3,2.3,12.5,218.33,JAWAHAR DOCK,TANKFARMS
+15,26B-BD1,null,null,yes,null,null,null,null,6.7,4.7,14.6,355.65,BHARATHI DOCK,MLA
+16,24B-BD II,yes,null,null,yes,null,null,null,2.8,1.6,16.5,382,BHARATHI DOCK,OPENPAVED
+17,27B-BD III,null,null,yes,null,null,null,null,25.7,18,16.5,307.1,BHARATHI DOCK,MLA
+18,20B-CTB 1,null,yes,null,null,null,null,null,8,6.5,13.4,200,BHARATHI DOCK,CONTAINERBAY
+19,21B-CTB 2,null,yes,null,null,null,null,null,8,6.5,13.4,200,BHARATHI DOCK,CONTAINERBAY
+20,22B-CTB 3,null,yes,null,null,null,null,null,8,6.5,13.4,200,BHARATHI DOCK,CONTAINERBAY
+21,23B-CTB 4,null,yes,null,null,null,null,null,8,7,13.4,285,BHARATHI DOCK,CONTAINERBAY
+22,5A-SCB 1,null,yes,null,null,null,null,null,6,5,15,275,DRAMBEDKAR DOCK,CONTAINERBAY
+23,4A-SCB 2,null,yes,null,null,null,null,null,6,5,15,270,DRAMBEDKAR DOCK,CONTAINERBAY
+24,3A-SCB 3,null,yes,null,null,null,null,null,6,5,15,287,DRAMBEDKAR DOCK,CONTAINERBAY
+25,01B-CB 1,null,null,null,yes,null,null,null,1,1,11,130,BHARATHI DOCK,OPENPAVED
+26,02B-CB 2,null,null,null,yes,null,null,null,1,0.7,10,130,BHARATHI DOCK,OPENPAVED
+27,28B-BB,null,null,null,null,null,null,yes,1,0.9,9,180,BHARATHI DOCK,TANKFARMS
