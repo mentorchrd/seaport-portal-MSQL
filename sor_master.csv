@@ -1,0 +1,43 @@
+sor_item,Commodity_GenricName,Cost_basis,coastal_rate,L_Max,foreign_rate,F_Max,Trade_type
+3.1.1.1,Acids of all kinds,Weight,143.44,,86.07,,Both
+3.1.1.2,Chemicals of all kinds,Weight,198.21,,118.93,,Both
+3.1.1.3,Crude oil,Weight,89.2,,89.2,,Both
+3.1.1.4,Diesel oil,Weight,107.97,,107.97,,Both
+3.1.1.5,Furnace oil,Weight,95.46,,95.46,,Both
+3.1.1.6,Kerosene oil & Aviation Turbine Fuel (ATF),Weight,114.23,,114.23,,Both
+3.1.1.7,"Lubricants, Bitumen & Base oil",Weight,114.23,,114.23,,Both
+3.1.1.8,Naphtha,Weight,120.5,,120.5,,Both
+3.1.1.9,Petrol,Weight,126.75,,126.75,,Both
+3.1.1.10,Bunker oil for vessels,Weight,56.18,,56.18,,Both
+3.1.1.11,Edible oil of all kinds,Weight,132.22,,79.33,,Both
+3.1.1.12,Molasses,Weight,59.46,,35.68,,Both
+3.1.1.13,Sludge Oil / Waste Oil,Weight,81.4,,81.4,,Both
+3.1.1.14,Aircraft,Unit,203480,,122088,,Both
+3.1.1.15,Boats and launches,Unit,30522,,18313,,Both
+3.1.1.16,Cereals and pulses of all kinds,Weight,58.68,,35.21,,Both
+3.1.1.17,"Coir, Coir products and Jute & Jute products",Weight,160.17,,96.11,,Both
+3.1.1.18,Building and Construction Materials,Weight,64.56,,38.74,,Both
+3.1.1.19,Defence stores,Weight,349.46,,209.68,,Both
+3.1.1.20,Fertilizer ,Weight,58.68,,35.21,,Both
+3.1.1.21,"Granite Blocks, Dressed marbles and slabs",Weight,381.43,,228.83,,Both
+3.1.1.22,Machineries and Equipment with Wheels,Value,0.425,149965,0.255,89979,Both
+3.1.1.23,Machineries and Equipment without Wheels,Value,0.425,,0.255,,Both
+3.1.1.24,Metal and Metal Products ,Weight,117.35,,70.41,,Both
+3.1.1.25,Metal scrap including shredded scrap,Weight,76.29,,45.78,,Both
+3.1.1.26-A,MVTwo wheelers-CargoPassenger,Unit,814,,488,,Both
+3.1.1.26-B,MVThree wheelers-CargoPassenger,Unit,2544,,1526,,Both
+3.1.1.26-C,MVFour wheelers-CargoPassenger,Value,0.5617,12047,0.3371,7228,Both
+3.1.1.26-D,MVSix wheelers and above -CargoPassenger,Value,0.425,43484,0.255,26090,Both
+3.1.1.27,Iron Ore Pellets,Weight,70.43,,70.43,,Both
+3.1.1.28-A,Ores and Minerals - Import,Weight,58.68,,35.21,,Import
+3.1.1.28-B,Ores and Minerals - Export,Weight,40.68,,24.41,,Export
+3.1.1.29,Provisions & Consumables for Passengers,Weight,87.03,,52.22,,Both
+3.1.1.30,Railway wagons & coaches,Unit,50870,,30522,,Both
+3.1.1.31,Locomotives,Unit,76305,,45783,,Both
+3.1.1.32,Salt of all kinds,Weight,33.47,,20.08,,Both
+3.1.1.33,Sugar of all kinds,Weight,73.64,,44.19,,Both
+3.1.1.34,Unaccompanied personal baggage,Unit,203.48,,122.09,,Both
+3.1.1.35,Timber logs,Weight,47.8,,28.69,,Both
+3.1.1.36,Wood and Wood-Based Products,Weight,80.08,,48.06,,Both
+3.1.1.37-A,OtherCargo-In Bulk,Weight,96.5,,57.9,,Both
+3.1.1.37-B,OtherCargo-Other than in Bulk,Value,0.425,,0.255,,Both

@@ -1,0 +1,40 @@
+cargo_id,name,hs_code,cargo_type,sor_item,VSL_category,IE_Type,norms,norms_HMC
+C310221I,Ammonium Sulphate,310221,Dry Bulk,20,Bulk cargo,Import,2000,8333
+C310420I,Muriate of Potash,310420,Dry Bulk,20,Bulk cargo,Import,2000,8333
+C25102010I,Rock Phosphate,25102010,Dry Bulk,20,Bulk cargo,Import,2000,8333
+C25030090I,Sulphur,25030090,Dry Bulk,20,Bulk cargo,Import,1800,8333
+C310210I,Urea,310210,Dry Bulk,20,Bulk cargo,Import,1400,8333
+C250510I,Silica Sand,250510,Dry Bulk,18,Bulk cargo,Import,1400,8333
+C251810I,Dolomite,251810,Dry Bulk,28,Bulk cargo,Import,4200,8333
+C252100I,Limestone,252100,Dry Bulk,28,Bulk cargo,Import,3400,8333
+C260112I,Iron Ore Pellet,260112,Dry Bulk,27,Bulk cargo,Import,3300,8333
+C252010I,Gypsum,252010,Dry Bulk,28,Bulk cargo,Import,3000,8333
+C100590I,Food Grains,100590,Dry Bulk,16,Bulk cargo,Import,1400,8333
+C720449I,Shredded Scrap,720449,Dry Bulk,25,Bulk cargo,Import,1600,8333
+C720430I,Heavy Melting Scrap,720430,Dry Bulk,25,Bulk cargo,Import,750,8333
+C100590E,"Food grains (Maize, etc.)",100590,Dry Bulk,16,Bulk cargo,Export,700,8333
+C251110E,Barytes,251110,Dry Bulk,28,Bulk cargo,Export,3400,8333
+C251740E,Cobble Stones,251740,Dry Bulk,28,Bulk cargo,Export,2400,8333
+C261900E,Mil Scale,261900,Dry Bulk,28,Bulk cargo,Export,3500,8333
+C252310E,Cement Clinkers,252310,Dry Bulk,28,Bulk cargo,Export,3700,8333
+C261800E,Ferro Slag,261800,Dry Bulk,16,Bulk cargo,Export,3500,8333
+C730630I,Steel bar/tubes/ pipes,730630,Break Bulk,24,Bulk cargo,Import,850,850
+C720917I,Steel CR Coil,720917,Break Bulk,24,Bulk cargo,Import,1700,1700
+C720851I,Steel Plate,720851,Break Bulk,24,Bulk cargo,Import,1400,1400
+C720711I,Steel Billet,720711,Break Bulk,24,Bulk cargo,Import,850,850
+C720839I,HR Coil,720839,Break Bulk,24,Bulk cargo,Import,2300,2300
+C842952I,Excavator,842952,Break Bulk,22,Bulk cargo,Import,450,450
+C847989I,Machinery,847989,Break Bulk,23,Bulk cargo,Import,450,450
+C850231I,Windmill,850231,Break Bulk,23,Bulk cargo,Import,450,450
+C440399I,Logs,440399,Break Bulk,35,Bulk cargo,Import,700,700
+C720711E,Steel Billet,720711,Break Bulk,24,Bulk cargo,Export,1000,1000
+C730630E,Steel bar,730630,Break Bulk,24,Bulk cargo,Export,1000,1000
+C730630E,Steel tubes,730630,Break Bulk,24,Bulk cargo,Export,1000,1000
+C730630E,Steel pipes,730630,Break Bulk,24,Bulk cargo,Export,1000,1000
+C720917E,Steel CR Coil,720917,Break Bulk,24,Bulk cargo,Export,1200,1200
+C68022310E,Granite Block,68022310,Break Bulk,21,Bulk cargo,Export,1000,1000
+C720839E,HR Coil,720839,Break Bulk,24,Bulk cargo,Export,2300,2300
+C251110E,Barytes - J. Bags,251110,Break Bulk,28,Bulk cargo,Export,1200,1200
+C842952E,Excavator,842952,Break Bulk,22,Bulk cargo,Export,250,250
+C847989E,Machinery,847989,Break Bulk,23,Bulk cargo,Export,250,250
+C850231E,Windmill,850231,Break Bulk,23,Bulk cargo,Export,250,250
