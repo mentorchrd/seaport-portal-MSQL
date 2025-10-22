@@ -5,20 +5,34 @@
   <title>Vessel Simulator</title>
   <link rel="stylesheet" href="../style.css">
   <style>
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #b0c4de;
+      font-size: 15px;
+      margin: 10px;
+    }
     .vessel-container {
       display: flex;
-      min-height: 90vh;
+      min-height: 100vh;
       align-items: flex-start;
       gap: 40px;
-      margin: 40px auto;
-      max-width: 1000px;
+      margin: 50px auto;
+      max-width: 2000px;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      padding: 20px;
+      height: 100vh;
     }
     .vessel-form-panel {
       width: 25%;
       background: #f8faff;
       border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-      padding: 30px 20px 20px 20px;
+      padding: 15px 20px 20px 20px;
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -33,11 +47,13 @@
       font-weight: 500;
     }
     .vessel-form-panel input {
-      margin-bottom: 10px;
-      padding: 7px 10px;
+      margin: 10px 0 0 0;
+      padding: 8px 10px;
       border-radius: 5px;
       border: 1px solid #b0c4de;
       font-size: 15px;
+      width: calc(100% - 20px);
+      box-sizing: border-box;
     }
     .vessel-form-panel button {
       margin-top: 18px;
@@ -97,29 +113,35 @@
       <button class="back-btn" id="backBtn">&larr; Back</button>
       <h2>Vessel Simulation Details</h2>
       <form id="vesselForm">
-        <label>Vessel Name<input type="text" name="vesselName" required></label>
-        <label>IMO Number<input type="text" name="imoNumber" required></label>
-        <label>GT<input type="number" name="gt" required></label>
-        <label>ETA<input type="datetime-local" name="eta" required></label>
-        <label>ETD<input type="datetime-local" name="etd" required></label>
-        <label>LOA<input type="number" name="loa" required></label>
-        <label>Draft<input type="number" name="draft" required></label>
-        <label>Beam<input type="number" name="beam" required></label>
+        <label>Vessel Name<input type="text" name="vesselName"></label>
+        <label>Trade Type
+          <div style="display:flex;gap:10px;margin-top:6px;">
+            <label><input type="radio" name="tradeType" value="Coastal" required> Coastal</label>
+            <label><input type="radio" name="tradeType" value="Foreign"> Foreign</label>
+          </div>
+        </label>
+        <label>GRT/GT<input type="number" name="gt" id="gt" required></label>
+        <label>LOA (m)<input type="number" step="0.1" name="loa" id="loa" required></label>
+        <label>Draft (m)<input type="number" step="0.1" name="draft" id="draft" required></label>
+        <label>Beam (m)<input type="number" step="0.1" name="beam" id="beam" required></label>
         <label>Cargo
           <select name="cargo" id="cargoSelect" required>
             <option value="">Select Cargo</option>
           </select>
         </label>
-        <label>Foreign<input type="text" name="foreign"></label>
-        <label>Postal<input type="text" name="postal"></label>
-        <label>Last Visit To<input type="text" name="lastVisit"></label>
-        <button type="submit">Submit</button>
+        <label>Cargo Quantity (MT)
+          <input type="number" name="cargoQty" id="cargoQty" step="0.1" placeholder="Enter cargo amount (for stay calc)" required>
+        </label>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button type="submit">Run Simulators</button>
+          <button type="button" id="resetBtn">Reset</button>
+        </div>
       </form>
     </div>
     <div class="right-panel" id="rightPanel">
       <div id="costBtns">
-        <button id="logisticBtn">Logistic Calculator</button>
-        <button id="costBtn">Cost Calculator</button>
+        <button id="logisticBtn" >Logistic Calculator</button>
+        <button id="costBtn" >Cost Calculator</button>
       </div>
     </div>
   </div>

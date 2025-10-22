@@ -10,6 +10,8 @@ const PORT = 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+// Serve db folder so client-side scripts can fetch CSV files under /db
+app.use('/db', express.static(path.join(__dirname, 'db')));
 
 app.post("/signup", async (req, res) => {
   const { firstName, lastName, mobile, email, company, password } = req.body;
