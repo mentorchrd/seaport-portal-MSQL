@@ -5,8 +5,35 @@
    - computes Port Dues, Pilotage and Berth Hire from CSVs
 */
 
-function fetchText(url){
-  return fetch(url).then(r=>{ if(!r.ok) throw new Error('fetch failed '+url); return r.text();});
+async function fetchText(url){
+  // Try the provided URL first, then several fallback relative prefixes so that the code works
+  // whether the server is serving from project root or the vessel folder.
+  const tryFetch = async (u)=>{
+    try{
+      const r = await fetch(u);
+      if(!r.ok) throw new Error('fetch failed '+u+' status='+r.status);
+      return await r.text();
+    }catch(e){
+      throw e;
+    }
+  };
+
+  const original = url;
+  const suffix = url.replace(/^\/+/,''); // remove leading slashes
+  const candidates = [original, './'+suffix, '../'+suffix, '../../'+suffix, suffix, window.location.origin + '/' + suffix];
+  let lastErr = null;
+  for(const c of candidates){
+    try{
+      const txt = await tryFetch(c);
+      if(c !== original) console.debug('fetchText: resolved', original, 'via', c);
+      return txt;
+    }catch(err){
+      lastErr = err;
+      // try next
+    }
+  }
+  // none worked
+  throw new Error('All fetch attempts failed for ' + url + ' last error: ' + (lastErr && lastErr.message));
 }
 
 function parseCSV(text){
@@ -21,45 +48,118 @@ function parseCSV(text){
 }
 
 document.addEventListener('DOMContentLoaded', async ()=>{
-  const form = document.getElementById('vesselForm');
-  const cargoSelect = document.getElementById('cargoSelect');
-  const rightPanel = document.getElementById('rightPanel');
-  const costBtns = document.getElementById('costBtns');
+  // New UI element IDs (fall back to older ids where present)
+  const calculateCostBtn = document.getElementById('calculateCostBtn');
+  const calculateLogisticsBtn = document.getElementById('calculateLogisticsBtn');
+  const costPanel = document.getElementById('costPanel');
+  const logisticsPanel = document.getElementById('logisticsPanel');
+  const totalCostValue = document.getElementById('totalCostValue');
+  const wharfageVal = document.getElementById('wharfageVal');
+  const demurrageVal = document.getElementById('demurrageVal');
+  const subtotalVal = document.getElementById('subtotalVal');
+  const taxesVal = document.getElementById('taxesVal');
+  const handlingHoursEl = document.getElementById('handlingHours');
+  const berthsList = document.getElementById('berthsList');
 
-  // results area
-  const resultsWrap = document.createElement('div');
-  resultsWrap.style.marginTop = '18px';
-  resultsWrap.style.width = '100%';
-  rightPanel.appendChild(resultsWrap);
+  // attempt to find older controls too (backwards compatibility)
+  const oldForm = document.getElementById('vesselForm');
+  const oldCargoSelect = document.getElementById('cargoSelect');
 
-  // load CSV masters including Cargo Master for norms
-  let berthMaster = [], berthHire = [], portDues = [], pilotage = [], cargoMaster = [];
-  try{
-    const [btxt, htxt, ptxt, piltxt, cargotxt] = await Promise.all([
-      fetchText('/db/VM_berth_master.csv'),
-      fetchText('/db/VM_berth_hire.csv'),
-      fetchText('/db/VM_port_dues.csv'),
-      fetchText('/db/VM_Pilotage_Master_with_Category.csv'),
-      fetchText('/db/CM_CargoMaster.csv')
-    ]);
-    berthMaster = parseCSV(btxt);
-    berthHire = parseCSV(htxt);
-    portDues = parseCSV(ptxt);
-    pilotage = parseCSV(piltxt);
-    cargoMaster = parseCSV(cargotxt);
-  }catch(err){
-    console.error('Error loading CSVs', err);
+  // results area for older UI (kept for compatibility)
+  let resultsWrap = document.getElementById('resultsWrap');
+  if(!resultsWrap){ resultsWrap = document.createElement('div'); resultsWrap.id = 'resultsWrap'; resultsWrap.style.marginTop='18px'; }
+
+  // load masters: prefer server-side MySQL API (/api/:table) then fallback to CSV in /db/*.csv
+  let berthMaster = [], berthHire = [], portDues = [], pilotage = [], cargoMaster = [], currencyLookup = [];
+
+  async function fetchRows(tableName){
+    // try API first
+    try{
+      const res = await fetch('/api/' + tableName);
+      if(res.ok){
+        const js = await res.json();
+        if(Array.isArray(js)) return js;
+      }
+    }catch(e){
+      // ignore and try CSV fallback
+    }
+    // CSV fallback (keeps existing behavior for deployments without server API)
+    try{
+      const txt = await fetchText('/db/' + tableName + '.csv');
+      return parseCSV(txt);
+    }catch(e){
+      console.error('Both API and CSV fetch failed for', tableName, e);
+      return [];
+    }
   }
 
-  // Populate cargo options from CM_CargoMaster.csv (Cargo Description preferred)
+  try{
+    [berthMaster, berthHire, portDues, pilotage, cargoMaster, currencyLookup] = await Promise.all([
+      fetchRows('VM_berth_master'),
+      fetchRows('VM_berth_hire'),
+      fetchRows('VM_port_dues'),
+      fetchRows('VM_Pilotage_Master_with_Category'),
+      fetchRows('CM_CargoMaster'),
+      fetchRows('VM_currency_lookup')
+    ]);
+  }catch(err){
+    console.error('Error loading masters', err);
+  }
+
+  // initialize currencyRates from loaded currencyLookup (if available)
+  try{
+    if(Array.isArray(currencyLookup) && currencyLookup.length>0){
+      const r = currencyLookup[0];
+      // find INR or USD fields case-insensitively
+      const keyMap = {};
+      Object.keys(r).forEach(k => { if(k) keyMap[k.trim().toLowerCase()] = k; });
+      const inrKey = keyMap['inr'] || keyMap['indian rupee'] || keyMap['rs'] || keyMap['rupee'];
+      const usdKey = keyMap['usd'] || keyMap['dollar'];
+      let inrPerUsd = NaN;
+      const inrVal = inrKey ? Number(r[inrKey]) : NaN;
+      const usdVal = usdKey ? Number(r[usdKey]) : NaN;
+      if(!isNaN(usdVal)){
+        if(usdVal > 1) inrPerUsd = usdVal;
+        else if (usdVal > 0) inrPerUsd = 1 / usdVal;
+      }
+      if(isNaN(inrPerUsd) && !isNaN(inrVal)){
+        if(inrVal > 1) inrPerUsd = inrVal;
+      }
+  if(!isNaN(inrPerUsd)) window.currencyRates = { INR: inrPerUsd };
+  if(window.currencyRates && !window._currencyRatesPromise) window._currencyRatesPromise = Promise.resolve(window.currencyRates);
+    }
+  }catch(e){ console.debug('currency init failed', e); }
+
+  // Populate cargo options into either old or new select
   try{
     const cargoNames = [...new Set(cargoMaster.map(r=>r['Cargo Description']).filter(Boolean))].sort();
-    cargoNames.forEach(name=>{
-      const opt = document.createElement('option'); opt.value = name; opt.textContent = name; cargoSelect.appendChild(opt);
-    });
+    const target = oldCargoSelect || document.getElementById('cargoName');
+    if(target){
+      target.innerHTML = '<option value="">Select Cargo</option>';
+      cargoNames.forEach(name=>{ const opt = document.createElement('option'); opt.value = name; opt.textContent = name; target.appendChild(opt); });
+    }
+    // when cargo changes, update the cargoGroup display if present
+    const cargoGroupEl = document.getElementById('cargoGroup');
+    const updateCargoGroup = (val)=>{
+      if(!val){ if(cargoGroupEl) cargoGroupEl.value = ''; return; }
+      const match = cargoMaster.find(r=> ((r['Cargo Description']||'').trim().toLowerCase() === (val||'').trim().toLowerCase()) || ((r['Cargo Short Name']||'').trim().toLowerCase() === (val||'').trim().toLowerCase()));
+      if(match){
+        // prefer Cargo Category Name, then Cargo Type Name, then Cargo Sub Category Name
+        const group = match['Cargo Category Name'] || match['Cargo Type Name'] || match['Cargo Sub Category Name'] || match['Cargo Category'] || '';
+        if(cargoGroupEl) cargoGroupEl.value = group || '';
+      } else {
+        if(cargoGroupEl) cargoGroupEl.value = '';
+      }
+    };
+    if(target){
+      target.addEventListener('change', (ev)=> updateCargoGroup(ev.target.value));
+      // set initial if any
+      if(target.value) updateCargoGroup(target.value);
+    }
   }catch(e){
     console.warn('could not load cargo master, using default options');
-    ['General Cargo','Bulk Cargo','Container','Liquid Bulk'].forEach(name=>{const opt=document.createElement('option');opt.value=name;opt.textContent=name;cargoSelect.appendChild(opt);});
+    const fallback = oldCargoSelect || document.getElementById('cargoName');
+    if(fallback){ ['General Cargo','Bulk Cargo','Container','Liquid Bulk'].forEach(name=>{const opt=document.createElement('option');opt.value=name;opt.textContent=name;fallback.appendChild(opt);}); }
   }
 
   function findEligibleBerths({loa,draft,beam,cargo}){
@@ -213,7 +313,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       }
       // fallback to local cache CSV
       try {
-        const txt = await fetch('/db/VM_currency_lookup.csv').then(r => { if (!r.ok) throw new Error('no cache'); return r.text(); });
+        const txt = await fetchText('/db/VM_currency_lookup.csv');
         const rows = parseCSV(txt);
         if (rows && rows.length) {
           const r = rows[0];
@@ -244,11 +344,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       } catch (e) {
         console.debug('currency cache load failed', e);
       }
-      // final fallback default (sensible recent value)
-      // fallback: use decimal USD-per-INR so multiplication yields USD
-      window.currencyRates = { INR: 1 / 82.5 };
-      console.debug('currencyRates fallback used', window.currencyRates);
-      return window.currencyRates;
+  // final fallback default (sensible recent value)
+  // Use INR per USD (approx). This value is used as multiplier when converting USD rates to INR.
+  window.currencyRates = { INR: 82.5 };
+  console.debug('currencyRates fallback used', window.currencyRates);
+  return window.currencyRates;
       })();
     }
 
@@ -269,72 +369,104 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     console.debug('lookupBerthHire: key',key,'rate',rate,'gt',gtN,'hours',hours,'ER',inrPerUsd,'amount',amount);
     return amount;
   }
-
-  function renderResults(preferredBerths, stayHours, charges, tradeType){
-    resultsWrap.innerHTML = '';
-    const tabs = document.createElement('div'); tabs.style.display='flex'; tabs.style.gap='10px';
-    const logBtn = document.getElementById('logisticBtn') || (function(){
-      const b = document.createElement('button'); b.id='logisticBtn'; b.textContent='Logistics Simulator'; return b;
-    })();
-    const costBtn = document.getElementById('costBtn') || (function(){
-      const b = document.createElement('button'); b.id='costBtn'; b.textContent='Cost Simulator'; return b;
-    })();
-    if(!tabs.contains(logBtn)) tabs.appendChild(logBtn);
-    if(!tabs.contains(costBtn)) tabs.appendChild(costBtn);
-    resultsWrap.appendChild(tabs);
-
-    const logPanel = document.createElement('div');
-    const costPanel = document.createElement('div');
-    logPanel.style.marginTop='12px'; costPanel.style.marginTop='12px';
-
-    logPanel.innerHTML = `<h3>Vessel Logistics Simulator</h3>
-      <p><strong>Preferred Berths:</strong> ${preferredBerths.length? preferredBerths.join(', '): 'No suitable berths found'}</p>
-      <p><strong>Stay at Berth:</strong> ${stayHours} hours</p>`;
-    if (tradeType === 'Foreign') {
-      console.log('fuk nigga', tradeType);
-      costPanel.innerHTML = `<h3>Vessel Cost Simulator</h3>
-      <p><strong>Port Dues (USD):</strong> ${charges.portDues!=null? charges.portDues.toFixed(2): 'N/A'}</p>
-      <p><strong>Pilotage (USD):</strong> ${charges.pilotage!=null? charges.pilotage.toFixed(2): 'N/A'}</p>
-      <p><strong>Berth Hire (USD):</strong> ${charges.berthHire!=null? charges.berthHire.toFixed(2): 'N/A'}</p>`;
-
-    }
-    else {
-      console.log('fuk  '+toString(tradeType));
-    costPanel.innerHTML = `<h3>Vessel Cost Simulator</h3>
-      <p><strong>Port Dues (INR):</strong> ${charges.portDues!=null? charges.portDues.toFixed(2): 'N/A'}</p>
-      <p><strong>Pilotage (INR):</strong> ${charges.pilotage!=null? charges.pilotage.toFixed(2): 'N/A'}</p>
-      <p><strong>Berth Hire (INR):</strong> ${charges.berthHire!=null? charges.berthHire.toFixed(2): 'N/A'}</p>`;
-    }
-    resultsWrap.appendChild(logPanel); resultsWrap.appendChild(costPanel);
-    logPanel.style.display='block'; costPanel.style.display='none';
-
-    logBtn.onclick = ()=>{ logPanel.style.display='block'; costPanel.style.display='none'; };
-    costBtn.onclick = ()=>{ logPanel.style.display='none'; costPanel.style.display='block'; };
+  // small helper: format INR
+  function formatINR(x){
+    if(x==null || isNaN(Number(x))) return '₹0';
+    const num = Number(x);
+    return '₹' + num.toLocaleString('en-IN', {maximumFractionDigits:0});
   }
 
-  form.addEventListener('submit', function(e){
-    e.preventDefault();
-    const fd = new FormData(form);
-    const tradeType = fd.get('tradeType') || 'Foreign';
-    const gt = Number(fd.get('gt')) || 0;
-    const loa = Number(fd.get('loa')) || 0;
-    const draft = Number(fd.get('draft')) || 0;
-    const beam = Number(fd.get('beam')) || 0;
-    const cargo = fd.get('cargo');
-    const qty = Number(fd.get('cargoQty')) || 0;
+  // Chart handling
+  let costChart = null;
+  function renderChart(wharfage, demurrage, taxes){
+    const ctx = document.getElementById('costChart');
+    if(!ctx) return;
+    if(costChart) costChart.destroy();
+    // display values in lakhs for better readability on chart
+    const data = [wharfage/100000, demurrage/100000, taxes/100000];
+    costChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Wharfage (lakhs)','Demurrage (lakhs)','Taxes (lakhs)'],
+        datasets: [{ data: data, backgroundColor: ['#3b82f6','#60a5fa','#93c5fd'], borderColor: 'white', borderWidth: 2 }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+    });
+  }
 
-    rightPanel.style.display = 'flex'; costBtns.style.display = 'flex';
+  // compute inputs from either old form or new UI
+  function readInputs(){
+    // prefer new UI fields
+    const vesselTypeEl = document.getElementById('vesselType');
+    const tradeType = (vesselTypeEl && vesselTypeEl.value && vesselTypeEl.value.trim().toLowerCase() === 'domestic') ? 'Coastal' : 'Foreign';
+    const gt = Number(document.getElementById('gt') ? document.getElementById('gt').value : (oldForm ? (oldForm.querySelector('[name="gt"]')||{value:0}).value : 0)) || 0;
+    const loa = Number(document.getElementById('loa') ? document.getElementById('loa').value : (oldForm ? (oldForm.querySelector('[name="loa"]')||{value:0}).value : 0)) || 0;
+    const draft = Number(document.getElementById('draft') ? document.getElementById('draft').value : (oldForm ? (oldForm.querySelector('[name="draft"]')||{value:0}).value : 0)) || 0;
+    const beam = Number(document.getElementById('beam') ? document.getElementById('beam').value : (oldForm ? (oldForm.querySelector('[name="beam"]')||{value:0}).value : 0)) || 0;
+    const cargo = (document.getElementById('cargoName') ? document.getElementById('cargoName').value : (oldCargoSelect ? oldCargoSelect.value : '')) || '';
+    const qty = Number(document.getElementById('weight') ? document.getElementById('weight').value : (oldForm ? (oldForm.querySelector('[name="cargoQty"]')||{value:0}).value : 0)) || 0;
+    const daysAfterFree = Number(document.getElementById('daysAfterFree') ? document.getElementById('daysAfterFree').value : (document.getElementById('daysAfterFree') ? document.getElementById('daysAfterFree').value : 0)) || 0;
+    const qtyDelivered = Number(document.getElementById('quantityDelivered') ? document.getElementById('quantityDelivered').value : qty) || qty;
+    return { tradeType, gt, loa, draft, beam, cargo, qty, daysAfterFree, qtyDelivered };
+  }
 
-    const berths = findEligibleBerths({loa,draft,beam,cargo});
-    const stay = estimateStayHours(cargo, qty);
-  const portDuesVal = lookupPortDues(gt, tradeType, cargo) || 0;
-  const pilotageVal = lookupPilotage(gt, tradeType, cargo) || 0;
-  const berthHireVal = lookupBerthHire(stay, gt, tradeType, cargo) || 0;
+  // compute and render both cost & logistics
+  function computeAndRender(){
+    const inp = readInputs();
+    const berths = findEligibleBerths({loa: inp.loa, draft: inp.draft, beam: inp.beam, cargo: inp.cargo});
+    const stayHours = estimateStayHours(inp.cargo, inp.qty);
+    const portDuesVal = lookupPortDues(inp.gt, inp.tradeType, inp.cargo) || 0;
+    const pilotageVal = lookupPilotage(inp.gt, inp.tradeType, inp.cargo) || 0;
+    const berthHireVal = lookupBerthHire(stayHours, inp.gt, inp.tradeType, inp.cargo) || 0;
 
-    renderResults(berths, stay, {portDues: portDuesVal, pilotage: pilotageVal, berthHire: berthHireVal, tradeType: tradeType});
-  });
+    // demurrage: try to get rate from cargo master, fallback to default INR per ton/day
+    let demurrageRate = null;
+    try{
+      const row = cargoMaster.find(r=> (r['Cargo Description']||'').trim().toLowerCase() === (inp.cargo||'').trim().toLowerCase());
+      if(row){ demurrageRate = Number(row.DEMURRAGE_RATE_PR_DAY || row.DEMURRAGE_RATE || row.demurrage_rate) || null; }
+    }catch(e){ }
+    if(!demurrageRate || isNaN(demurrageRate)) demurrageRate = 50; // INR per ton per day default
+    const demurrageAmount = inp.daysAfterFree > 0 ? (inp.daysAfterFree * inp.qtyDelivered * demurrageRate) : 0;
 
-  document.getElementById('resetBtn').onclick = ()=>{ form.reset(); resultsWrap.innerHTML=''; rightPanel.style.display='none'; };
-  document.getElementById('backBtn').onclick = function(){ window.location.href = '../dashboard.html'; };
+    const subtotal = (portDuesVal||0) + (pilotageVal||0) + (berthHireVal||0) + demurrageAmount;
+    const taxes = subtotal * 0.18;
+    const total = subtotal + taxes;
+
+    // update cost panel values
+    if(totalCostValue) totalCostValue.textContent = formatINR(total);
+    if(wharfageVal) wharfageVal.textContent = formatINR(portDuesVal);
+    if(demurrageVal) demurrageVal.textContent = formatINR(demurrageAmount);
+    if(subtotalVal) subtotalVal.textContent = formatINR(subtotal);
+    if(taxesVal) taxesVal.textContent = formatINR(taxes);
+
+    // update logistics panel
+    if(handlingHoursEl) handlingHoursEl.textContent = String(stayHours);
+    if(berthsList) berthsList.innerHTML = '<div class="logistics-item-label">' + (berths.length? berths.join(', ') : 'No suitable berths found') + '</div>';
+
+    // render chart (values in INR converted to lakhs for chart)
+    renderChart(portDuesVal, demurrageAmount, taxes);
+
+    return { berths, stayHours, amounts: { portDuesVal, pilotageVal, berthHireVal, demurrageAmount, subtotal, taxes, total } };
+  }
+
+  // wire buttons
+  if(calculateCostBtn){
+    calculateCostBtn.addEventListener('click', ()=>{
+      const res = computeAndRender();
+      if(costPanel){ costPanel.classList.add('active'); costPanel.setAttribute('aria-hidden','false'); }
+      if(logisticsPanel){ logisticsPanel.classList.remove('active'); logisticsPanel.setAttribute('aria-hidden','true'); }
+    });
+  }
+  if(calculateLogisticsBtn){
+    calculateLogisticsBtn.addEventListener('click', ()=>{
+      const res = computeAndRender();
+      if(logisticsPanel){ logisticsPanel.classList.add('active'); logisticsPanel.setAttribute('aria-hidden','false'); }
+      if(costPanel){ costPanel.classList.remove('active'); costPanel.setAttribute('aria-hidden','true'); }
+    });
+  }
+
+  // initial hide
+  if(costPanel) costPanel.classList.remove('active');
+  if(logisticsPanel) logisticsPanel.classList.remove('active');
 
 });
