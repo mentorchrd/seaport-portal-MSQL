@@ -29,6 +29,14 @@
     .breakdown-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
     .chart-container { position: relative; height: 200px; margin: 0.5rem 0; }
     .section-title { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; margin: 0.5rem 0 0.35rem 0; }
+    .mode-selector { display: flex; gap: 1rem; margin-bottom: 0.5rem; grid-column: 1 / -1; }
+    .mode-selector label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; cursor: pointer; }
+    .mode-selector input[type="radio"] { cursor: pointer; }
+    .hidden { display: none !important; }
+    .logistics-panel { background: white; border-radius: 0.6rem; padding: 0.75rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); margin-top: 0.5rem; }
+    .logistics-item { margin: 0.5rem 0; }
+    .logistics-item-label { font-size: 0.85rem; color: #555; margin-bottom: 0.2rem; }
+    .logistics-item-value { font-size: 1rem; font-weight: 600; color: #1a1a1a; }
   </style>
 </head>
 <body>
@@ -41,45 +49,164 @@
       <div class="form-card">
         <h2>CARGO CHARGES</h2>
 
-        <div class="form-section">
-          <h3>Cargo Details</h3>
-          <div class="form-group">
-            <label for="cargoName">Cargo Name</label>
-            <select id="cargoName">
-              <!-- Options populated dynamically -->
-            </select>
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+          <label><input type="radio" name="cargoMode" value="cargo" checked> Cargo</label>
+          <label><input type="radio" name="cargoMode" value="container"> Container</label>
+        </div>
+
+        <!-- Cargo Mode Section -->
+        <div id="cargoModeSection">
+          <div class="form-section">
+            <h3>Cargo Details</h3>
+            <div class="form-group">
+              <label for="cargoName">Cargo Name</label>
+              <select id="cargoName">
+                <!-- Options populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cargoGroup">Cargo Category</label>
+              <input type="text" id="cargoGroup" disabled>
+            </div>
+            <div class="form-group">
+              <label for="weight">Weight of Cargo (Tons)</label>
+              <input type="number" id="weight" value="40000">
+            </div>
+            <div class="form-group">
+              <label for="tradeType">Trade Type</label>
+              <select id="tradeType">
+                <option>Foreign</option>
+                <option>Coastal</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="operationType">Operation Type</label>
+              <select id="operationType">
+                <option>import</option>
+                <option>export</option>
+                <option>both</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="storageType">Storage Type</label>
+              <select id="storageType">
+                <option>open</option>
+                <option>covered</option>
+                <option>any</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="cargoGroup">Cargo Category</label>
-            <input type="text" id="cargoGroup" disabled>
+
+          <div class="form-section">
+            <h3>Vessel Details (for Berth Allocation)</h3>
+            <div class="form-group">
+              <label for="loa">Length Overall (LOA) m</label>
+              <input type="number" id="loa" value="200">
+            </div>
+            <div class="form-group">
+              <label for="draft">Draft (m)</label>
+              <input type="number" id="draft" value="10">
+            </div>
+            <div class="form-group">
+              <label for="beam">Beam (m)</label>
+              <input type="number" id="beam" value="30">
+            </div>
           </div>
-          <div class="form-group">
-            <label for="weight">Weight of Cargo (Tons)</label>
-            <input type="number" id="weight" value="40000">
-          </div>
-          <div class="form-group">
-            <label for="tradeType">Trade Type</label>
-            <select id="tradeType">
-              <option>Foreign</option>
-              <option>Coastal</option>
-            </select>
+
+          <div class="form-section">
+            <h3>Demurrage Details</h3>
+            <div class="form-group">
+              <label for="daysAfterFree">Days after free period</label>
+              <input type="number" id="daysAfterFree" value="0">
+            </div>
+            <div class="form-group">
+              <label for="quantityDelivered">Quantity Delivered (Tons)</label>
+              <input type="number" id="quantityDelivered" value="40000">
+            </div>
           </div>
         </div>
 
-        <div class="form-section">
-          <h3>Demurrage Details</h3>
-          <div class="form-group">
-            <label for="daysAfterFree">Days after free period</label>
-            <input type="number" id="daysAfterFree" value="0">
+        <!-- Container Mode Section -->
+        <div id="containerModeSection" class="hidden">
+          <div class="form-section">
+            <h3>Container Details</h3>
+            <div class="form-group">
+              <label for="containerType">Container Type</label>
+              <select id="containerType">
+                <option>Standard</option>
+                <option>Shipper Own</option>
+                <option>MAFI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="containerSize">Container Size</label>
+              <select id="containerSize">
+                <option>Upto 20 Feet</option>
+                <option>20-40 Feet</option>
+                <option>Above 40 Feet</option>
+              </select>
+            </div>
+            <div class="form-group" id="containerStatusGroup">
+              <label for="containerStatus">Status</label>
+              <select id="containerStatus">
+                <option>Empty</option>
+                <option>Laden</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="containerQuantity">Number of Containers</label>
+              <input type="number" id="containerQuantity" value="10">
+            </div>
+            <div class="form-group hidden" id="cargoValueGroup">
+              <label for="cargoValue">Cargo Value (INR)</label>
+              <input type="number" id="cargoValue" value="0">
+            </div>
+            <div class="form-group">
+              <label for="containerTradeType">Trade Type</label>
+              <select id="containerTradeType">
+                <option>Foreign</option>
+                <option>Coastal</option>
+              </select>
+            </div>
           </div>
-          <div class="form-group">
-            <label for="quantityDelivered">Quantity Delivered (Tons)</label>
-            <input type="number" id="quantityDelivered" value="40000">
+
+          <div class="form-section">
+            <h3>Vessel Details (for Berth Allocation)</h3>
+            <div class="form-group">
+              <label for="containerLoa">Length Overall (LOA) m</label>
+              <input type="number" id="containerLoa" value="200">
+            </div>
+            <div class="form-group">
+              <label for="containerDraft">Draft (m)</label>
+              <input type="number" id="containerDraft" value="10">
+            </div>
+            <div class="form-group">
+              <label for="containerBeam">Beam (m)</label>
+              <input type="number" id="containerBeam" value="30">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Demurrage Details</h3>
+            <div class="form-group">
+              <label for="containerDaysAfterFree">Days after free period</label>
+              <input type="number" id="containerDaysAfterFree" value="0">
+            </div>
+            <div class="form-group">
+              <label for="containerOperationType">Operation Type</label>
+              <select id="containerOperationType">
+                <option>import</option>
+                <option>export</option>
+                <option>both</option>
+              </select>
+            </div>
           </div>
         </div>
 
         <div class="button-group">
           <button class="btn btn-primary" id="calculateCostBtn">Calculate Cargo Charges</button>
+          <button class="btn btn-primary" id="calculateLogisticsBtn">Calculate Logistics</button>
         </div>
       </div>
 
@@ -108,6 +235,20 @@
 
           <div class="chart-container">
             <canvas id="costChart"></canvas>
+          </div>
+        </div>
+
+        <div id="logisticsPanel" class="panel hidden">
+          <div class="section-title">Operational Logistics</div>
+          
+          <div class="logistics-item">
+            <div class="logistics-item-label">Handling Time (hours)</div>
+            <div id="handlingHours" class="logistics-item-value">0</div>
+          </div>
+
+          <div class="logistics-item">
+            <div class="logistics-item-label">Eligible Berths</div>
+            <div id="berthsList" class="logistics-item-value">--</div>
           </div>
         </div>
       </div>

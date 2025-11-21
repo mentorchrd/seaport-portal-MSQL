@@ -73,6 +73,17 @@ app.get('/api/mysql/wharfage', (req, res) => {
   });
 });
 
+// Endpoint to get demurrage charges
+app.get('/api/mysql/dem-charges', (req, res) => {
+  db.query('SELECT * FROM cm_dem_charges', (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
+
 app.get('/api/:table', (req, res) => {
   const table = req.params.table;
   if (!allowedTables.has(table)) return res.status(404).json({ error: 'table not allowed' });

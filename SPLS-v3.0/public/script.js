@@ -72,6 +72,16 @@ app.get('/api/mysql/wharfage', (req, res) => {
     res.json(results.length > 0 ? results[0] : null);
   });
 });
+// dem charges endpoint
+app.get('/api/mysql/demurrage', (req, res) => {
+  db.query('SELECT * FROM cm_dem_charges', (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
 
 app.get('/api/:table', (req, res) => {
   const table = req.params.table;

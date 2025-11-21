@@ -1,6 +1,8 @@
 /* Cargo charges calculator
-   - Wharfage based on SoRNoCode from cargo master
-   - Demurrage based on cargo rates and days after free period
+   - Wharfage based on SoRNoCode from cargo master (weight/value/unit based)
+   - Demurrage with slab-based rates
+   - Container handling charges
+   - Berth allocation and logistics
 */
 
 async function fetchText(url){
@@ -42,15 +44,56 @@ function parseCSV(text){
 
 document.addEventListener('DOMContentLoaded', async ()=>{
   const calculateCostBtn = document.getElementById('calculateCostBtn');
+  const calculateLogisticsBtn = document.getElementById('calculateLogisticsBtn');
   const costPanel = document.getElementById('costPanel');
+  const logisticsPanel = document.getElementById('logisticsPanel');
   const totalCostValue = document.getElementById('totalCostValue');
   const wharfageValEl = document.getElementById('wharfageVal');
   const demurrageValEl = document.getElementById('demurrageVal');
   const subtotalVal = document.getElementById('subtotalVal');
   const taxesVal = document.getElementById('taxesVal');
+  const handlingHoursEl = document.getElementById('handlingHours');
+  const berthsList = document.getElementById('berthsList');
+
+  // Mode selector elements
+  const cargoModeSection = document.getElementById('cargoModeSection');
+  const containerModeSection = document.getElementById('containerModeSection');
+  const modeRadios = document.querySelectorAll('input[name="cargoMode"]');
+  const containerTypeSelect = document.getElementById('containerType');
+  const containerStatusGroup = document.getElementById('containerStatusGroup');
+  const cargoValueGroup = document.getElementById('cargoValueGroup');
 
   let cargoDescriptions = [];
   let selectedCargoData = null;
+  let berthMaster = [];
+  let demCharges = [];
+  let currentMode = 'cargo';
+
+  // Mode switching logic
+  modeRadios.forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      currentMode = e.target.value;
+      if(currentMode === 'cargo'){
+        cargoModeSection.classList.remove('hidden');
+        containerModeSection.classList.add('hidden');
+      } else {
+        cargoModeSection.classList.add('hidden');
+        containerModeSection.classList.remove('hidden');
+      }
+    });
+  });
+
+  // Container type change handler
+  containerTypeSelect.addEventListener('change', (e) => {
+    const type = e.target.value;
+    if(type === 'Shipper Own'){
+      containerStatusGroup.classList.add('hidden');
+      cargoValueGroup.classList.remove('hidden');
+    } else {
+      containerStatusGroup.classList.remove('hidden');
+      cargoValueGroup.classList.add('hidden');
+    }
+  });
 
   async function fetchCargoDescriptions(){
     try {
@@ -100,10 +143,51 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     return null;
   }
 
+  async function fetchDemCharges() {
+    try {
+      const res = await fetch('/api/mysql/dem-charges');
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.error('Failed to fetch demurrage charges', e);
+    }
+    try {
+      const txt = await fetchText('/db/CM_Dem_Charges.csv');
+      return parseCSV(txt);
+    } catch (err) {
+      console.error('Both MySQL and CSV fetch failed for demurrage charges', err);
+      return [];
+    }
+  }
+
+  async function fetchRows(tableName){
+    try{
+      const res = await fetch('/api/' + tableName);
+      if(res.ok){
+        const js = await res.json();
+        if(Array.isArray(js)) return js;
+      }
+    }catch(e){
+      // ignore and try CSV fallback
+    }
+    try{
+      const txt = await fetchText('/db/' + tableName + '.csv');
+      return parseCSV(txt);
+    }catch(e){
+      console.error('Both API and CSV fetch failed for', tableName, e);
+      return [];
+    }
+  }
+
   try {
-    cargoDescriptions = await fetchCargoDescriptions();
+    [cargoDescriptions, demCharges, berthMaster] = await Promise.all([
+      fetchCargoDescriptions(),
+      fetchDemCharges(),
+      fetchRows('VM_berth_master')
+    ]);
   } catch(err) {
-    console.error('Error loading cargo descriptions', err);
+    console.error('Error loading masters', err);
   }
 
   // Populate cargo options
@@ -145,23 +229,218 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     console.warn('could not load cargo descriptions', e);
   }
 
-  function lookupWharfage(weight, tradeType) {
+  function lookupWharfage(weight, tradeType, cargoValue) {
+    if (currentMode === 'container') {
+      return calculateContainerWharfage();
+    }
+
     if (!selectedCargoData || !selectedCargoData.wharfageRates) {
       console.debug('lookupWharfage: no wharfage rates available');
       return null;
     }
     
     const rates = selectedCargoData.wharfageRates;
-    const rate = tradeType === 'Coastal' ? Number(rates.coastal_rate) : Number(rates.foreign_rate);
+    const costBasis = rates.Cost_basis || 'Weight';
+    const rate = tradeType === 'Foreign' ? Number(rates.coastal_rate) : Number(rates.foreign_rate);
     
     if (isNaN(rate)) {
       console.debug('lookupWharfage: invalid rate', rates);
       return null;
     }
     
-    const amount = weight * rate;
-    console.debug('lookupWharfage: weight', weight, 'tradeType', tradeType, 'rate', rate, 'amount', amount);
+    let amount = 0;
+    if (costBasis === 'Value') {
+      // Ad valorem - rate is percentage
+      amount = (cargoValue || 0) * (rate / 100);
+      console.debug('lookupWharfage: value-based', cargoValue, 'rate%', rate, 'amount', amount);
+    } else if (costBasis === 'Unit') {
+      // Per unit
+      amount = weight * rate;
+      console.debug('lookupWharfage: unit-based', weight, 'rate', rate, 'amount', amount);
+    } else {
+      // Weight-based (default)
+      amount = weight * rate;
+      console.debug('lookupWharfage: weight-based', weight, 'rate', rate, 'amount', amount);
+    }
+    
     return amount;
+  }
+
+  function calculateContainerWharfage() {
+    const containerType = document.getElementById('containerType').value;
+    const containerSize = document.getElementById('containerSize').value;
+    const containerStatus = document.getElementById('containerStatus').value;
+    const quantity = Number(document.getElementById('containerQuantity').value) || 0;
+    const tradeType = document.getElementById('containerTradeType').value;
+    const cargoValue = Number(document.getElementById('cargoValue').value) || 0;
+
+    if (containerType === 'Shipper Own') {
+      // Ad valorem for shipper own containers
+      const rate = tradeType === 'Foreign' ? 0.4250 : 0.2550;
+      return (cargoValue * rate / 100);
+    }
+
+    // Standard and MAFI containers - use fixed rates
+    const rateTable = {
+      'Standard': {
+        'Empty': {
+          'Upto 20 Feet': { Foreign: 127, Coastal: 76 },
+          '20-40 Feet': { Foreign: 190, Coastal: 113 },
+          'Above 40 Feet': { Foreign: 253, Coastal: 151 }
+        },
+        'Laden': {
+          'Upto 20 Feet': { Foreign: 1252, Coastal: 750 },
+          '20-40 Feet': { Foreign: 1878, Coastal: 1126 },
+          'Above 40 Feet': { Foreign: 2503, Coastal: 1500 }
+        }
+      },
+      'MAFI': {
+        'Empty': {
+          'Upto 20 Feet': { Foreign: 127, Coastal: 76 },
+          '20-40 Feet': { Foreign: 190, Coastal: 113 },
+          'Above 40 Feet': { Foreign: 253, Coastal: 151 }
+        },
+        'Laden': {
+          'Upto 20 Feet': { Foreign: 127, Coastal: 76 },
+          '20-40 Feet': { Foreign: 190, Coastal: 113 },
+          'Above 40 Feet': { Foreign: 253, Coastal: 151 }
+        }
+      }
+    };
+
+    const rate = rateTable[containerType]?.[containerStatus]?.[containerSize]?.[tradeType] || 0;
+    return quantity * rate;
+  }
+
+  function calculateDemurrage(daysAfterFree, quantity, operationType, storageType, tradeType, demCargo) {
+    if (daysAfterFree <= 0 || quantity <= 0) return 0;
+
+    // Find matching demurrage slab
+    const matching = demCharges.filter(row => {
+      const cargoMatch = row.DemCargo && row.DemCargo.toLowerCase().includes(demCargo.toLowerCase());
+      const oprMatch = row.OprType === 'both' || row.OprType === operationType;
+      const tradeMatch = row.TradeType === 'both' || row.TradeType.toLowerCase() === tradeType.toLowerCase();
+      const strMatch = row.StrType === 'any' || row.StrType === storageType;
+      
+      return cargoMatch && oprMatch && tradeMatch && strMatch;
+    });
+
+    if (matching.length === 0) {
+      console.debug('calculateDemurrage: no matching slabs found');
+      return 0;
+    }
+
+    // Calculate demurrage for each slab
+    let totalDemurrage = 0;
+    let remainingDays = daysAfterFree;
+
+    // Sort slabs by start day
+    const sortedSlabs = matching.sort((a, b) => Number(a.DemStart_day) - Number(b.DemStart_day));
+
+    for (const slab of sortedSlabs) {
+      const slabStart = Number(slab.DemStart_day);
+      const slabEnd = Number(slab.DemEnd_day);
+      const slabRate = Number(slab.dem_rate);
+
+      if (remainingDays <= 0) break;
+
+      // Calculate days in this slab
+      const daysInSlab = Math.min(remainingDays, slabEnd - slabStart + 1);
+      
+      // Apply rate
+      const slabAmount = quantity * daysInSlab * slabRate;
+      totalDemurrage += slabAmount;
+      remainingDays -= daysInSlab;
+
+      console.debug(`Demurrage slab: days ${slabStart}-${slabEnd}, rate ${slabRate}, daysInSlab ${daysInSlab}, amount ${slabAmount}`);
+    }
+
+    return totalDemurrage;
+  }
+
+  function findEligibleBerths({loa, draft, beam, cargo}) {
+    const isYes = v => {
+      if(v==null) return false;
+      const s = String(v).trim().toLowerCase();
+      return s === 'yes' || s === 'y' || s === 'true' || s === '1';
+    };
+
+    const candidates = berthMaster.filter(b=>{
+      const quay = parseFloat(b.Quay_Len) || 0;
+      const berthDraft = parseFloat(b.Draft) || 0;
+      const berthBeam = parseFloat(b.Beam) || 999;
+      
+      let cargoOk = false;
+      if(cargo){
+        const low = cargo.toLowerCase();
+        if(low.includes('container')){
+          cargoOk = isYes(b.Container);
+        }
+        else if(low.includes('liquid') && low.includes('bulk')){
+          cargoOk = isYes(b.Liquid_Bulk);
+        }
+        else if(low.includes('liquid') || low.includes('tank') || low.includes('tanker') || low.includes('oil')){
+          cargoOk = isYes(b.Liquid_Bulk);
+        }
+        else if(low.includes('bulk') || low.includes('ore') || low.includes('iron') || low.includes('coal') || low.includes('grain')){
+          cargoOk = isYes(b.Bulk);
+        }
+        else if(low.includes('roro') || low.includes('ro-ro')){
+          cargoOk = isYes(b.RORO);
+        }
+        else if(low.includes('pol')){
+          cargoOk = isYes(b.POL);
+        }
+        else if(low.includes('passenger') || low.includes('cruise')){
+          cargoOk = isYes(b.PassnCruise);
+        }
+        else if(low.includes('bunker')){
+          cargoOk = isYes(b.Bunker);
+        }
+        else {
+          const hasSpecializedType = isYes(b.Container) || isYes(b.Liquid_Bulk) || isYes(b.RORO) || 
+                                     isYes(b.POL) || isYes(b.PassnCruise) || isYes(b.Bunker);
+          cargoOk = !hasSpecializedType && isYes(b.Bulk);
+        }
+      } else {
+        cargoOk = isYes(b.Bulk);
+      }
+      
+      return quay >= loa && berthDraft >= draft && beam <= berthBeam && cargoOk;
+    });
+
+    const dockGroups = {};
+    candidates.forEach(b => {
+      const dock = b.Dock_Name || 'Unknown Dock';
+      if(!dockGroups[dock]) dockGroups[dock] = [];
+      dockGroups[dock].push(b.BerthName);
+    });
+
+    const formatted = Object.keys(dockGroups).map(dock => {
+      const berths = dockGroups[dock].slice(0, 5).map(b => ` • ${b}`).join('<br>');
+      return `<b>${dock}</b><br>${berths}`;
+    });
+
+    return formatted;
+  }
+
+  function estimateHandlingTime(cargo, quantity) {
+    let rateMtPerDay = 1000; // default
+    
+    if (selectedCargoData) {
+      const rate = Number(selectedCargoData.DSCHRG_RATE_PR_DAY) || Number(selectedCargoData.LD_RATE_PR_DAY);
+      if (rate && rate > 0) rateMtPerDay = rate;
+    } else if (cargo) {
+      const name = cargo.toLowerCase();
+      if(name.includes('grain') || name.includes('food')) rateMtPerDay = 800;
+      if(name.includes('iron') || name.includes('ore')) rateMtPerDay = 2500;
+      if(name.includes('cement') || name.includes('clinker')) rateMtPerDay = 1200;
+      if(name.includes('container')) rateMtPerDay = 400;
+      if(name.includes('liquid') || name.includes('oil') || name.includes('diesel') || name.includes('tank')) rateMtPerDay = 5000;
+    }
+
+    const days = Math.max((quantity || 0) / rateMtPerDay, 0.1);
+    return Math.round(days * 24);
   }
 
   function formatINR(x){
@@ -187,24 +466,59 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   }
 
   function readInputs(){
-    const tradeTypeEl = document.getElementById('tradeType');
-    const tradeType = tradeTypeEl ? tradeTypeEl.value : 'Foreign';
-    const weight = Number(document.getElementById('weight').value) || 0;
-    const daysAfterFree = Number(document.getElementById('daysAfterFree').value) || 0;
-    const qtyDelivered = Number(document.getElementById('quantityDelivered').value) || weight;
-    return { tradeType, weight, daysAfterFree, qtyDelivered };
+    if (currentMode === 'cargo') {
+      const tradeType = document.getElementById('tradeType').value;
+      const weight = Number(document.getElementById('weight').value) || 0;
+      const daysAfterFree = Number(document.getElementById('daysAfterFree').value) || 0;
+      const qtyDelivered = Number(document.getElementById('quantityDelivered').value) || weight;
+      const operationType = document.getElementById('operationType').value;
+      const storageType = document.getElementById('storageType').value;
+      const loa = Number(document.getElementById('loa').value) || 0;
+      const draft = Number(document.getElementById('draft').value) || 0;
+      const beam = Number(document.getElementById('beam').value) || 0;
+      const cargo = document.getElementById('cargoName').value || '';
+      const cargoValue = 0; // Not used in cargo mode unless wharfage is value-based
+      
+      return { tradeType, weight, daysAfterFree, qtyDelivered, operationType, storageType, 
+               loa, draft, beam, cargo, cargoValue };
+    } else {
+      // Container mode
+      const tradeType = document.getElementById('containerTradeType').value;
+      const quantity = Number(document.getElementById('containerQuantity').value) || 0;
+      const daysAfterFree = Number(document.getElementById('containerDaysAfterFree').value) || 0;
+      const operationType = document.getElementById('containerOperationType').value;
+      const loa = Number(document.getElementById('containerLoa').value) || 0;
+      const draft = Number(document.getElementById('containerDraft').value) || 0;
+      const beam = Number(document.getElementById('containerBeam').value) || 0;
+      const cargoValue = Number(document.getElementById('cargoValue').value) || 0;
+      
+      return { tradeType, weight: quantity, daysAfterFree, qtyDelivered: quantity, 
+               operationType, storageType: 'any', loa, draft, beam, cargo: 'container', cargoValue };
+    }
   }
 
   function computeAndRender(){
     const inp = readInputs();
-    const wharfageVal = lookupWharfage(inp.weight, inp.tradeType) || 0;
+    
+    // Calculate wharfage
+    const wharfageVal = lookupWharfage(inp.weight, inp.tradeType, inp.cargoValue) || 0;
 
-    let demurrageRate = null;
-    if(selectedCargoData){
-      demurrageRate = Number(selectedCargoData.DEMURRAGE_RATE_PR_DAY || selectedCargoData.DEMURRAGE_RATE || selectedCargoData.demurrage_rate) || null;
+    // Determine cargo category for demurrage
+    let demCargo = 'non-container';
+    if (currentMode === 'container' || (selectedCargoData && selectedCargoData.CargoCategoryName && 
+        selectedCargoData.CargoCategoryName.toLowerCase().includes('container'))) {
+      demCargo = 'container';
     }
-    if(!demurrageRate || isNaN(demurrageRate)) demurrageRate = 50;
-    const demurrageAmount = inp.daysAfterFree > 0 ? (inp.daysAfterFree * inp.qtyDelivered * demurrageRate) : 0;
+
+    // Calculate demurrage using slabs
+    const demurrageAmount = calculateDemurrage(
+      inp.daysAfterFree,
+      inp.qtyDelivered,
+      inp.operationType,
+      inp.storageType,
+      inp.tradeType,
+      demCargo
+    );
 
     const subtotal = (wharfageVal||0) + demurrageAmount;
     const taxes = subtotal * 0.18;
@@ -221,9 +535,40 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     return { amounts: { wharfageVal, demurrageAmount, subtotal, taxes, total } };
   }
 
+  function computeLogistics() {
+    const inp = readInputs();
+    const berths = findEligibleBerths({loa: inp.loa, draft: inp.draft, beam: inp.beam, cargo: inp.cargo});
+    const handlingTime = estimateHandlingTime(inp.cargo, inp.weight);
+
+    if(handlingHoursEl) handlingHoursEl.textContent = String(handlingTime);
+    if(berthsList) {
+      if(berths.length) {
+        berthsList.innerHTML = berths.map(b => '<div class="logistics-item-label">' + b + '</div>').join('');
+      } else {
+        berthsList.innerHTML = '<div class="logistics-item-label">No suitable berths found</div>';
+      }
+    }
+
+    return { berths, handlingTime };
+  }
+
   if(calculateCostBtn){
     calculateCostBtn.addEventListener('click', ()=>{
       computeAndRender();
+      if(costPanel) {
+        costPanel.classList.remove('hidden');
+        logisticsPanel.classList.add('hidden');
+      }
+    });
+  }
+
+  if(calculateLogisticsBtn){
+    calculateLogisticsBtn.addEventListener('click', ()=>{
+      computeLogistics();
+      if(logisticsPanel) {
+        logisticsPanel.classList.remove('hidden');
+        costPanel.classList.add('hidden');
+      }
     });
   }
 });
