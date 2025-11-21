@@ -1,172 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <!DOCTYPE html>
-  <html lang="en">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seaport Fare & Logistics Simulator</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      /* Aggressively compact layout so left side won't need scrolling */
-      html, body { height: 100%; }
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(to bottom, #87CEEB, #ADD8E6); height: 100%; overflow: hidden; font-size: 13px; }
-      .header { background-color: #87CEEB; padding: 0.5rem 0.5rem; text-align: center; border-bottom: 1px solid #B0E0E6; }
-      .header h1 { font-size: 1rem; }
-      .container { max-width: 1100px; height: calc(100vh - 48px); margin: 0 auto; padding: 0.4rem; }
-      /* main-grid takes full remaining height */
-      .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 0.5rem; height: 100%; align-items: start; }
-      @media (max-width: 1024px) { .main-grid { grid-template-columns: 1fr; grid-auto-rows: 1fr; } }
-      /* make form card fill available height and avoid any scrolling */
-      .form-card { background: white; border-radius: 0.6rem; padding: 0.6rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); height: 100%; overflow: hidden; display: flex; flex-direction: column; }
-      .form-card h2 { font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
-  /* place form groups in two columns to reduce vertical height */
-  .form-section { margin-bottom: 0.4rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; align-items: center; }
-  .form-section h3 { grid-column: 1 / -1; margin: 0 0 0.25rem 0; font-size: 0.95rem; }
-  .form-group { margin: 0; }
-  .form-group label { display: block; font-size: 0.75rem; font-weight: 500; color: #555; margin-bottom: 0.18rem; }
-  .form-group input, .form-group select { width: 100%; padding: 0.22rem 0.5rem; border: 1px solid #ddd; border-radius: 0.36rem; font-size: 0.85rem; }
-  .button-group { display: grid; grid-template-columns: 1fr 1fr; gap: 0.35rem; margin-top: 0.5rem; grid-column: 1 / -1; }
-      .btn { padding: 0.5rem 0.75rem; font-size: 0.9rem; font-weight: 600; border-radius: 0.4rem; cursor: pointer; border: none; }
-      .btn-primary { background-color: #2563eb; color: white; }
-      .btn-secondary { background-color: white; color: #2563eb; border: 2px solid #2563eb; }
+<!-- FILE: public/vessel/index.html -->
+</head>
+<body>
+<div class="vessel-container">
+<div class="vessel-form-panel">
+<button class="back-btn" id="backBtn">&larr; Back</button>
+<h2>Vessel Simulation Details</h2>
 
-      /* Right column container — panels overlap in same spot */
-      .right-col { position: relative; height: 100%; }
-      .panel { position: absolute; top: 0; left: 0; width: 100%; height: 100%; box-sizing: border-box; background: white; border-radius: 0.6rem; padding: 0.75rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); opacity: 0; transform: translateY(4px); transition: opacity 200ms ease, transform 200ms ease; pointer-events: none; overflow: hidden; }
-      .panel.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-      .cost-value { font-size: 1.25rem; font-weight: 700; color: #2563eb; margin: 0.4rem 0; }
-      .breakdown-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
-      .chart-container { position: relative; height: 34%; margin: 0.5rem 0; }
-      .logistics-item { padding: 0.6rem; background-color: #f9fafb; border-radius: 0.45rem; margin-bottom: 0.45rem; }
-      .section-title { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; margin: 0.5rem 0 0.35rem 0; }
-    </style>
-  </head>
-  <body>
-    <div class="header">
-      <h1>Seaport Vessel Module</h1>
-    </div>
 
-    <div class="container">
-      <div class="main-grid">
-        <div class="form-card">
-          <h2>VESSEL MODULE</h2>
+<form id="vesselForm">
+<label>Vessel Name
+<input type="text" name="vesselName" placeholder="Optional - e.g. MV Example">
+</label>
 
-          <div class="form-section">
-            <h3>Vessel Details</h3>
-            <div class="form-group">
-              <label for="vesselType">Vessel Type</label>
-              <select id="vesselType">
-                <option>Foreign</option>
-                <option>Domestic</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="gt">GRT / GT</label>
-              <input type="number" id="gt" value="5000">
-            </div>
-            <div class="form-group">
-              <label for="loa">LOA (m)</label>
-              <input type="number" step="0.1" id="loa" value="180">
-            </div>
-            <div class="form-group">
-              <label for="draft">Draft (m)</label>
-              <input type="number" step="0.1" id="draft" value="9.5">
-            </div>
-            <div class="form-group">
-              <label for="beam">Beam (m)</label>
-              <input type="number" step="0.1" id="beam" value="30">
-            </div>
-          </div>
 
-          <div class="form-section">
-            <h3>Cargo Details</h3>
-            <div class="form-group">
-              <label for="cargoName">Cargo Name</label>
-              <select id="cargoName">
-                <option>Fertilizer</option>
-                <option>Coal</option>
-                <option>Grain</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="cargoGroup">Cargo Group</label>
-              <input type="text" id="cargoGroup" value="Dry Bulk" disabled>
-            </div>
-            <div class="form-group">
-              <label for="weight">Weight of Cargo (Tons)</label>
-              <input type="number" id="weight" value="40000">
-            </div>
-          </div>
+<label>Trade Type <span class="small">(Required)</span></label>
+<div class="row">
+<div class="col"><label><input type="radio" name="tradeType" value="foreign" checked> Foreign</label></div>
+<div class="col"><label><input type="radio" name="tradeType" value="coastal"> Coastal</label></div>
+</div>
 
-          <div class="form-section">
-            <h3>Demurrage Details</h3>
-            <div class="form-group">
-              <label for="daysAfterFree">Days after free period</label>
-              <input type="number" id="daysAfterFree" value="10">
-            </div>
-            <div class="form-group">
-              <label for="quantityDelivered">Quantity Delivered (Tons)</label>
-              <input type="number" id="quantityDelivered" value="40000">
-            </div>
-          </div>
 
-          <div class="button-group">
-            <button class="btn btn-primary" id="calculateCostBtn">Calculate Cost</button>
-            <button class="btn btn-secondary" id="calculateLogisticsBtn">Calculate Logistics</button>
-          </div>
-        </div>
+<div class="row">
+<div class="col"><label>GRT / GT <span class="small">(Required)</span>
+<input type="number" name="gt" step="1" min="0" required>
+</label></div>
+<div class="col"><label>Parcel Size <span class="small">(units / MT / TEU)</span>
+<input type="number" name="parcelSize" step="0.01" min="0" required>
+</label></div>
+</div>
 
-        <div class="right-col">
-          <div id="costPanel" class="panel" aria-hidden="true">
-            <div class="section-title">Total Estimated Cost</div>
-            <div id="totalCostValue" class="cost-value">₹0</div>
 
-            <div class="section-title">Fare Breakdown</div>
-            <div class="breakdown-item">
-              <span class="breakdown-label">Wharfage:</span>
-              <span id="wharfageVal" class="breakdown-value">₹0</span>
-            </div>
-            <div class="breakdown-item">
-              <span class="breakdown-label">Demurrage:</span>
-              <span id="demurrageVal" class="breakdown-value">₹0</span>
-            </div>
-            <div class="breakdown-item">
-              <span class="breakdown-label">Sub-Total:</span>
-              <span id="subtotalVal" class="breakdown-value">₹0</span>
-            </div>
-            <div class="breakdown-item">
-              <span class="breakdown-label">Taxes (GST @ 18%):</span>
-              <span id="taxesVal" class="breakdown-value">₹0</span>
-            </div>
+<div class="row">
+<div class="col"><label>LOA (m) <span class="small">(Required)</span>
+<input type="number" name="loa" step="0.01" min="0" required>
+</label></div>
+<div class="col"><label>Beam (m) <span class="small">(Required)</span>
+<input type="number" name="beam" step="0.01" min="0" required>
+</label></div>
+</div>
 
-            <div class="chart-container">
-              <canvas id="costChart"></canvas>
-            </div>
-          </div>
 
-          <div id="logisticsPanel" class="panel" aria-hidden="true">
-            <div class="section-title">Estimated Handling Time</div>
-            <div class="cost-value" style="font-size: 1.75rem;"><span id="handlingHours">0</span> <span style="font-size: 1rem; color: #666;">Hours</span></div>
+<label>Draft (m) <span class="small">(Required)</span>
+<input type="number" name="draft" step="0.01" min="0" required>
+</label>
 
-            <div class="logistics-item">
-              <div class="logistics-item-label">Cargo Free Days:</div>
-              <div class="logistics-item-value" id="freeDaysVal">7 days</div>
-            </div>
 
-            <div class="section-title">Suitable Berths & Available Facility</div>
-            <div id="berthsList" class="logistics-item">
-              <div class="logistics-item-label">-</div>
-              <div class="logistics-item-value">-</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<label>Cargo <span class="small">(Required)</span>
+<select name="cargoId" id="cargoSelect" required>
+<option value="">Loading cargos...</option>
+</select>
+</label>
 
-    <!-- load local logic that performs CSV lookups and calculations -->
-    <script defer src="vessel.js"></script>
-  </body>
-  </html>
+
+<div style="display:flex; gap:8px;">
+<button type="submit">Run Simulation</button>
+<button type="button" id="clearBtn" style="background:#e0e7ef; color:#003366;">Clear</button>
+</div>
+
+
+</form>
+
+
+<p class="small" style="margin-top:8px; color:#555">After a successful run, use the Logistic and Cost tabs to view results. The simulation will return 2–5 preferred berths and computed charges.</p>
+</div>
+
+
+<div class="right-panel">
+<div class="panel-card">
+<div class="tabs">
+<button id="tabLogBtn" class="active">Logistics</button>
+<button id="tabCostBtn">Cost</button>
+</div>
+
+
+<div id="logisticsPanel" class="output">
+<h3>Preferred Berths</h3>
+<ul id="preferredBerths"></ul>
+<h4>Stay at Berth (hours): <span id="stayHours">-</span></h4>
+<div>
+<h4>Details</h4>
+<pre id="logisticsDebug">No results yet</pre>
+</div>
+</div>
+
+
+<div id="costPanel" class="output" style="display:none">
+<h3>Cost Summary (INR)</h3>
+<div>Port Dues: <strong id="portDues">-</strong></div>
+<div>Pilotage: <strong id="pilotage">-</strong></div>
+<div>Berth Hire: <strong id="berthHire">-</strong></div>
+<div style="margin-top:8px">Total: <strong id="totalCost">-</strong></div>
+</html>
