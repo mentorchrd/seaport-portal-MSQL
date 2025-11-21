@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 8.0.34, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 8.0.41, for Win64 (x86_64)
 --
 -- Host: localhost    Database: seaportdb
 -- ------------------------------------------------------
--- Server version	8.0.35
+-- Server version	8.0.41
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -23,7 +23,7 @@ DROP TABLE IF EXISTS `cm_cargomaster`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cm_cargomaster` (
-  `ï»¿CMSNo` int DEFAULT NULL,
+  `CMSNo` int DEFAULT NULL,
   `CargoCode` text,
   `CargoDescription` text,
   `CargoCategoryName` text,
@@ -83,7 +83,7 @@ DROP TABLE IF EXISTS `cm_dem_charges`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cm_dem_charges` (
-  `ï»¿demChrgCode` text,
+  `demChrgCode` text,
   `DemCargo` text,
   `OprType` text,
   `TradeType` text,
@@ -113,7 +113,7 @@ DROP TABLE IF EXISTS `cm_dem_free_days`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cm_dem_free_days` (
-  `ï»¿demfrcode` text,
+  `demfrcode` text,
   `DemTypeCargoType` text,
   `OprType` text,
   `FreeDays` int DEFAULT NULL,
@@ -139,14 +139,15 @@ DROP TABLE IF EXISTS `cm_wharfage_master`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `cm_wharfage_master` (
-  `ï»¿sor_item` text,
+  `sor_item` varchar(60) NOT NULL,
   `Commodity_GenricName` text,
   `Cost_basis` text,
   `coastal_rate` double DEFAULT NULL,
   `L_Max` text,
   `foreign_rate` double DEFAULT NULL,
   `F_Max` text,
-  `Trade_type` text
+  `Trade_type` text,
+  PRIMARY KEY (`sor_item`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -156,7 +157,7 @@ CREATE TABLE `cm_wharfage_master` (
 
 LOCK TABLES `cm_wharfage_master` WRITE;
 /*!40000 ALTER TABLE `cm_wharfage_master` DISABLE KEYS */;
-INSERT INTO `cm_wharfage_master` VALUES ('3.1.1.1','Acids of all kinds','Weight',143.44,'',86.07,'','Both'),('3.1.1.2','Chemicals of all kinds','Weight',198.21,'',118.93,'','Both'),('3.1.1.3','Crude oil','Weight',89.2,'',89.2,'','Both'),('3.1.1.4','Diesel oil','Weight',107.97,'',107.97,'','Both'),('3.1.1.5','Furnace oil','Weight',95.46,'',95.46,'','Both'),('3.1.1.6','Kerosene oil & Aviation Turbine Fuel (ATF)','Weight',114.23,'',114.23,'','Both'),('3.1.1.7','Lubricants, Bitumen & Base oil','Weight',114.23,'',114.23,'','Both'),('3.1.1.8','Naphtha','Weight',120.5,'',120.5,'','Both'),('3.1.1.9','Petrol','Weight',126.75,'',126.75,'','Both'),('3.1.1.10','Bunker oil for vessels','Weight',56.18,'',56.18,'','Both'),('3.1.1.11','Edible oil of all kinds','Weight',132.22,'',79.33,'','Both'),('3.1.1.12','Molasses','Weight',59.46,'',35.68,'','Both'),('3.1.1.13','Sludge Oil / Waste Oil','Weight',81.4,'',81.4,'','Both'),('3.1.1.14','Aircraft','Unit',203480,'',122088,'','Both'),('3.1.1.15','Boats and launches','Unit',30522,'',18313,'','Both'),('3.1.1.16','Cereals and pulses of all kinds','Weight',58.68,'',35.21,'','Both'),('3.1.1.17','Coir, Coir products and Jute & Jute products','Weight',160.17,'',96.11,'','Both'),('3.1.1.18','Building and Construction Materials','Weight',64.56,'',38.74,'','Both'),('3.1.1.19','Defence stores','Weight',349.46,'',209.68,'','Both'),('3.1.1.20','Fertilizer ','Weight',58.68,'',35.21,'','Both'),('3.1.1.21','Granite Blocks, Dressed marbles and slabs','Weight',381.43,'',228.83,'','Both'),('3.1.1.22','Machineries and Equipment with Wheels','Value',0.425,'149965',0.255,'89979','Both'),('3.1.1.23','Machineries and Equipment without Wheels','Value',0.425,'',0.255,'','Both'),('3.1.1.24','Metal and Metal Products ','Weight',117.35,'',70.41,'','Both'),('3.1.1.25','Metal scrap including shredded scrap','Weight',76.29,'',45.78,'','Both'),('3.1.1.26-A','MVTwo wheelers-CargoPassenger','Unit',814,'',488,'','Both'),('3.1.1.26-B','MVThree wheelers-CargoPassenger','Unit',2544,'',1526,'','Both'),('3.1.1.26-C','MVFour wheelers-CargoPassenger','Value',0.5617,'12047',0.3371,'7228','Both'),('3.1.1.26-D','MVSix wheelers and above -CargoPassenger','Value',0.425,'43484',0.255,'26090','Both'),('3.1.1.27','Iron Ore Pellets','Weight',70.43,'',70.43,'','Both'),('3.1.1.28-A','Ores and Minerals - Import','Weight',58.68,'',35.21,'','Import'),('3.1.1.28-B','Ores and Minerals - Export','Weight',40.68,'',24.41,'','Export'),('3.1.1.29','Provisions & Consumables for Passengers','Weight',87.03,'',52.22,'','Both'),('3.1.1.30','Railway wagons & coaches','Unit',50870,'',30522,'','Both'),('3.1.1.31','Locomotives','Unit',76305,'',45783,'','Both'),('3.1.1.32','Salt of all kinds','Weight',33.47,'',20.08,'','Both'),('3.1.1.33','Sugar of all kinds','Weight',73.64,'',44.19,'','Both'),('3.1.1.34','Unaccompanied personal baggage','Unit',203.48,'',122.09,'','Both'),('3.1.1.35','Timber logs','Weight',47.8,'',28.69,'','Both'),('3.1.1.36','Wood and Wood-Based Products','Weight',80.08,'',48.06,'','Both'),('3.1.1.37-A','OtherCargo-In Bulk','Weight',96.5,'',57.9,'','Both'),('3.1.1.37-B','OtherCargo-Other than in Bulk','Value',0.425,'',0.255,'','Both'),('3.1.2.A.1.a','Container-Empty-20 ft','Unit',75,'',127,'','Both'),('3.1.2.A.1.b','Container-Empty-40 ft','Unit',113,'',190,'','Both'),('3.1.2.A.1.c','Container-Empty-above 40 ft ','Unit',151,'',253,'','Both'),('3.1.2.A.2.a','Container-Laden-20 ft','Unit',750,'',1252,'','Both'),('3.1.2.A.2.b','Container-Laden-40 ft','Unit',1126,'',1878,'','Both'),('3.1.2.A.2.c','Container-Laden-Above 420 ft','Unit',1500,'',2503,'','Both'),('3.1.2.B','Shipper Own Containers','Value',0.255,'',0.425,'','Both'),('3.1.2.C.1.a','MAFI - 20 ft','Unit',76,'',127,'','Both'),('3.1.2.C.1.b','MAFI - 40 ft','Unit',113,'',190,'','Both'),('3.1.2.C.1.c','MAFI - Above 60 ft','Unit',151,'',253,'','Both'),('3.1.2.C.2','Cargo Loaded on MAFI','Unit',151,'',253,'','Both');
+INSERT INTO `cm_wharfage_master` VALUES ('3.1.1.1','Acids of all kinds','Weight',143.44,'',86.07,'','Both'),('3.1.1.10','Bunker oil for vessels','Weight',56.18,'',56.18,'','Both'),('3.1.1.11','Edible oil of all kinds','Weight',132.22,'',79.33,'','Both'),('3.1.1.12','Molasses','Weight',59.46,'',35.68,'','Both'),('3.1.1.13','Sludge Oil / Waste Oil','Weight',81.4,'',81.4,'','Both'),('3.1.1.14','Aircraft','Unit',203480,'',122088,'','Both'),('3.1.1.15','Boats and launches','Unit',30522,'',18313,'','Both'),('3.1.1.16','Cereals and pulses of all kinds','Weight',58.68,'',35.21,'','Both'),('3.1.1.17','Coir, Coir products and Jute & Jute products','Weight',160.17,'',96.11,'','Both'),('3.1.1.18','Building and Construction Materials','Weight',64.56,'',38.74,'','Both'),('3.1.1.19','Defence stores','Weight',349.46,'',209.68,'','Both'),('3.1.1.2','Chemicals of all kinds','Weight',198.21,'',118.93,'','Both'),('3.1.1.20','Fertilizer ','Weight',58.68,'',35.21,'','Both'),('3.1.1.21','Granite Blocks, Dressed marbles and slabs','Weight',381.43,'',228.83,'','Both'),('3.1.1.22','Machineries and Equipment with Wheels','Value',0.425,'149965',0.255,'89979','Both'),('3.1.1.23','Machineries and Equipment without Wheels','Value',0.425,'',0.255,'','Both'),('3.1.1.24','Metal and Metal Products ','Weight',117.35,'',70.41,'','Both'),('3.1.1.25','Metal scrap including shredded scrap','Weight',76.29,'',45.78,'','Both'),('3.1.1.26.A','MVTwo wheelers-CargoPassenger','Unit',814,'',488,'','Both'),('3.1.1.26.B','MVThree wheelers-CargoPassenger','Unit',2544,'',1526,'','Both'),('3.1.1.26.C','MVFour wheelers-CargoPassenger','Value',0.5617,'12047',0.3371,'7228','Both'),('3.1.1.26.D','MVSix wheelers and above -CargoPassenger','Value',0.425,'43484',0.255,'26090','Both'),('3.1.1.27','Iron Ore Pellets','Weight',70.43,'',70.43,'','Both'),('3.1.1.28.A','Ores and Minerals - Import','Weight',58.68,'',35.21,'','Import'),('3.1.1.28.B','Ores and Minerals - Export','Weight',40.68,'',24.41,'','Export'),('3.1.1.29','Provisions & Consumables for Passengers','Weight',87.03,'',52.22,'','Both'),('3.1.1.3','Crude oil','Weight',89.2,'',89.2,'','Both'),('3.1.1.30','Railway wagons & coaches','Unit',50870,'',30522,'','Both'),('3.1.1.31','Locomotives','Unit',76305,'',45783,'','Both'),('3.1.1.32','Salt of all kinds','Weight',33.47,'',20.08,'','Both'),('3.1.1.33','Sugar of all kinds','Weight',73.64,'',44.19,'','Both'),('3.1.1.34','Unaccompanied personal baggage','Unit',203.48,'',122.09,'','Both'),('3.1.1.35','Timber logs','Weight',47.8,'',28.69,'','Both'),('3.1.1.36','Wood and Wood-Based Products','Weight',80.08,'',48.06,'','Both'),('3.1.1.37.A','OtherCargo-In Bulk','Weight',96.5,'',57.9,'','Both'),('3.1.1.37.B','OtherCargo-Other than in Bulk','Value',0.425,'',0.255,'','Both'),('3.1.1.4','Diesel oil','Weight',107.97,'',107.97,'','Both'),('3.1.1.5','Furnace oil','Weight',95.46,'',95.46,'','Both'),('3.1.1.6','Kerosene oil & Aviation Turbine Fuel (ATF)','Weight',114.23,'',114.23,'','Both'),('3.1.1.7','Lubricants, Bitumen & Base oil','Weight',114.23,'',114.23,'','Both'),('3.1.1.8','Naphtha','Weight',120.5,'',120.5,'','Both'),('3.1.1.9','Petrol','Weight',126.75,'',126.75,'','Both'),('3.1.2.A.1.a','Container-Empty-20 ft','Unit',75,'',127,'','Both'),('3.1.2.A.1.b','Container-Empty-40 ft','Unit',113,'',190,'','Both'),('3.1.2.A.1.c','Container-Empty-above 40 ft ','Unit',151,'',253,'','Both'),('3.1.2.A.2.a','Container-Laden-20 ft','Unit',750,'',1252,'','Both'),('3.1.2.A.2.b','Container-Laden-40 ft','Unit',1126,'',1878,'','Both'),('3.1.2.A.2.c','Container-Laden-Above 420 ft','Unit',1500,'',2503,'','Both'),('3.1.2.B','Shipper Own Containers','Value',0.255,'',0.425,'','Both'),('3.1.2.C.1.a','MAFI - 20 ft','Unit',76,'',127,'','Both'),('3.1.2.C.1.b','MAFI - 40 ft','Unit',113,'',190,'','Both'),('3.1.2.C.1.c','MAFI - Above 60 ft','Unit',151,'',253,'','Both'),('3.1.2.C.2','Cargo Loaded on MAFI','Unit',151,'',253,'','Both');
 /*!40000 ALTER TABLE `cm_wharfage_master` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -310,7 +311,7 @@ DROP TABLE IF EXISTS `rm_demurrage`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `rm_demurrage` (
-  `ï»¿Time_start_HRS` double DEFAULT NULL,
+  `Time_start_HRS` double DEFAULT NULL,
   `Time_end_HRS` double DEFAULT NULL,
   `Dem_Rate` int DEFAULT NULL,
   `Dem_UOM` text
@@ -520,7 +521,7 @@ DROP TABLE IF EXISTS `vm_berth_hire`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vm_berth_hire` (
-  `ï»¿vessel_type` text,
+  `vessel_type` text,
   `coastal_rate` double DEFAULT NULL,
   `foreign_rate` double DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -544,7 +545,7 @@ DROP TABLE IF EXISTS `vm_berth_master`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vm_berth_master` (
-  `ï»¿Berth_ID` int DEFAULT NULL,
+  `Berth_ID` int NOT NULL,
   `BerthName` text,
   `Liquid_Bulk` text,
   `Container` text,
@@ -558,7 +559,9 @@ CREATE TABLE `vm_berth_master` (
   `Draft` double DEFAULT NULL,
   `Quay_Len` double DEFAULT NULL,
   `Dock_Name` text,
-  `Facility` text
+  `Facility` text,
+  `Beam` int DEFAULT NULL,
+  PRIMARY KEY (`Berth_ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -568,8 +571,31 @@ CREATE TABLE `vm_berth_master` (
 
 LOCK TABLES `vm_berth_master` WRITE;
 /*!40000 ALTER TABLE `vm_berth_master` DISABLE KEYS */;
-INSERT INTO `vm_berth_master` VALUES (1,'19A-NQ','yes',NULL,NULL,'yes',NULL,NULL,NULL,1,0.7,8.5,198,'DRAMBEDKAR DOCK','OPENPAVED'),(2,'18A-WQ-1','yes',NULL,NULL,'yes','yes',NULL,NULL,1.4,0.9,11,170.6,'DRAMBEDKAR DOCK','OPENPAVED'),(3,'17A-WQ-2','yes',NULL,NULL,'yes','yes',NULL,NULL,2.5,1,12,170.6,'DRAMBEDKAR DOCK','OPENPAVED'),(4,'16A-CB',NULL,NULL,NULL,'yes','yes','yes',NULL,2.2,1.5,12,170.6,'DRAMBEDKAR DOCK','TRANSITSHED'),(5,'15A-WQ-III',NULL,NULL,NULL,'yes','yes','yes',NULL,2.7,1.9,12,170.6,'DRAMBEDKAR DOCK','TRANSITSHED'),(6,'14A-WQ-IV',NULL,NULL,NULL,'yes','yes','yes',NULL,2.7,1.9,11,170.6,'DRAMBEDKAR DOCK','TRANSITSHED'),(7,'13A-SQ-I',NULL,NULL,NULL,'yes',NULL,NULL,NULL,2.6,1.8,9.5,246.6,'DRAMBEDKAR DOCK','OPENPAVED'),(8,'6A-SQ-II','yes',NULL,NULL,'yes',NULL,NULL,NULL,1.4,1,9.5,179,'DRAMBEDKAR DOCK','TANKFARMS'),(9,'12J-JD-1',NULL,NULL,NULL,'yes',NULL,NULL,NULL,4.2,2.9,12.5,218.33,'JAWAHAR DOCK','TRANSITSHED'),(10,'11J-JD-3',NULL,NULL,NULL,'yes',NULL,NULL,NULL,4.3,3,13,218.33,'JAWAHAR DOCK','TRANSITSHED'),(11,'10J-JD-5',NULL,NULL,NULL,'yes',NULL,NULL,NULL,3.1,2.2,13,218.33,'JAWAHAR DOCK','TRANSITSHED'),(12,'7J-JD-2','yes',NULL,NULL,'yes',NULL,NULL,NULL,4.8,3.1,14,218.33,'JAWAHAR DOCK','TANKFARMS'),(13,'8J-JD-4','yes',NULL,NULL,'yes',NULL,NULL,NULL,2,1.3,14,218.33,'JAWAHAR DOCK','TANKFARMS'),(14,'9J-JD-6','yes',NULL,NULL,'yes',NULL,NULL,NULL,3.3,2.3,12.5,218.33,'JAWAHAR DOCK','TANKFARMS'),(15,'26B-BD1',NULL,NULL,'yes',NULL,NULL,NULL,NULL,6.7,4.7,14.6,355.65,'BHARATHI DOCK','MLA'),(16,'24B-BD II','yes',NULL,NULL,'yes',NULL,NULL,NULL,2.8,1.6,16.5,382,'BHARATHI DOCK','OPENPAVED'),(17,'27B-BD III',NULL,NULL,'yes',NULL,NULL,NULL,NULL,25.7,18,16.5,307.1,'BHARATHI DOCK','MLA'),(18,'20B-CTB 1',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,6.5,13.4,200,'BHARATHI DOCK','CONTAINERBAY'),(19,'21B-CTB 2',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,6.5,13.4,200,'BHARATHI DOCK','CONTAINERBAY'),(20,'22B-CTB 3',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,6.5,13.4,200,'BHARATHI DOCK','CONTAINERBAY'),(21,'23B-CTB 4',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,7,13.4,285,'BHARATHI DOCK','CONTAINERBAY'),(22,'5A-SCB 1',NULL,'yes',NULL,NULL,NULL,NULL,NULL,6,5,15,275,'DRAMBEDKAR DOCK','CONTAINERBAY'),(23,'4A-SCB 2',NULL,'yes',NULL,NULL,NULL,NULL,NULL,6,5,15,270,'DRAMBEDKAR DOCK','CONTAINERBAY'),(24,'3A-SCB 3',NULL,'yes',NULL,NULL,NULL,NULL,NULL,6,5,15,287,'DRAMBEDKAR DOCK','CONTAINERBAY'),(25,'01B-CB 1',NULL,NULL,NULL,'yes',NULL,NULL,NULL,1,1,11,130,'BHARATHI DOCK','OPENPAVED'),(26,'02B-CB 2',NULL,NULL,NULL,'yes',NULL,NULL,NULL,1,0.7,10,130,'BHARATHI DOCK','OPENPAVED'),(27,'28B-BB',NULL,NULL,NULL,NULL,NULL,NULL,'yes',1,0.9,9,180,'BHARATHI DOCK','TANKFARMS');
+INSERT INTO `vm_berth_master` VALUES (1,'19A-NQ','yes',NULL,NULL,'yes',NULL,NULL,NULL,1,0.7,8.5,198,'DRAMBEDKAR DOCK','OPENPAVED',45),(2,'18A-WQ-1','yes',NULL,NULL,'yes','yes',NULL,NULL,1.4,0.9,11,170.6,'DRAMBEDKAR DOCK','OPENPAVED',45),(3,'17A-WQ-2','yes',NULL,NULL,'yes','yes',NULL,NULL,2.5,1,12,170.6,'DRAMBEDKAR DOCK','OPENPAVED',45),(4,'16A-CB',NULL,NULL,NULL,'yes','yes','yes',NULL,2.2,1.5,12,170.6,'DRAMBEDKAR DOCK','TRANSITSHED',45),(5,'15A-WQ-III',NULL,NULL,NULL,'yes','yes','yes',NULL,2.7,1.9,12,170.6,'DRAMBEDKAR DOCK','TRANSITSHED',45),(6,'14A-WQ-IV',NULL,NULL,NULL,'yes','yes','yes',NULL,2.7,1.9,11,170.6,'DRAMBEDKAR DOCK','TRANSITSHED',45),(7,'13A-SQ-I',NULL,NULL,NULL,'yes',NULL,NULL,NULL,2.6,1.8,9.5,246.6,'DRAMBEDKAR DOCK','OPENPAVED',45),(8,'6A-SQ-II','yes',NULL,NULL,'yes',NULL,NULL,NULL,1.4,1,9.5,179,'DRAMBEDKAR DOCK','TANKFARMS',45),(9,'12J-JD-1',NULL,NULL,NULL,'yes',NULL,NULL,NULL,4.2,2.9,12.5,218.33,'JAWAHAR DOCK','TRANSITSHED',35),(10,'11J-JD-3',NULL,NULL,NULL,'yes',NULL,NULL,NULL,4.3,3,13,218.33,'JAWAHAR DOCK','TRANSITSHED',35),(11,'10J-JD-5',NULL,NULL,NULL,'yes',NULL,NULL,NULL,3.1,2.2,13,218.33,'JAWAHAR DOCK','TRANSITSHED',35),(12,'7J-JD-2','yes',NULL,NULL,'yes',NULL,NULL,NULL,4.8,3.1,14,218.33,'JAWAHAR DOCK','TANKFARMS',35),(13,'8J-JD-4','yes',NULL,NULL,'yes',NULL,NULL,NULL,2,1.3,14,218.33,'JAWAHAR DOCK','TANKFARMS',35),(14,'9J-JD-6','yes',NULL,NULL,'yes',NULL,NULL,NULL,3.3,2.3,12.5,218.33,'JAWAHAR DOCK','TANKFARMS',35),(15,'26B-BD1',NULL,NULL,'yes',NULL,NULL,NULL,NULL,6.7,4.7,14.6,355.65,'BHARATHI DOCK','MLA',75),(16,'24B-BD II','yes',NULL,NULL,'yes',NULL,NULL,NULL,2.8,1.6,16.5,382,'BHARATHI DOCK','OPENPAVED',75),(17,'27B-BD III',NULL,NULL,'yes',NULL,NULL,NULL,NULL,25.7,18,16.5,307.1,'BHARATHI DOCK','MLA',75),(18,'20B-CTB 1',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,6.5,13.4,200,'BHARATHI DOCK','CONTAINERBAY',75),(19,'21B-CTB 2',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,6.5,13.4,200,'BHARATHI DOCK','CONTAINERBAY',75),(20,'22B-CTB 3',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,6.5,13.4,200,'BHARATHI DOCK','CONTAINERBAY',75),(21,'23B-CTB 4',NULL,'yes',NULL,NULL,NULL,NULL,NULL,8,7,13.4,285,'BHARATHI DOCK','CONTAINERBAY',75),(22,'5A-SCB 1',NULL,'yes',NULL,NULL,NULL,NULL,NULL,6,5,15,275,'DRAMBEDKAR DOCK','CONTAINERBAY',45),(23,'4A-SCB 2',NULL,'yes',NULL,NULL,NULL,NULL,NULL,6,5,15,270,'DRAMBEDKAR DOCK','CONTAINERBAY',45),(24,'3A-SCB 3',NULL,'yes',NULL,NULL,NULL,NULL,NULL,6,5,15,287,'DRAMBEDKAR DOCK','CONTAINERBAY',45),(25,'01B-CB 1',NULL,NULL,NULL,'yes',NULL,NULL,NULL,1,1,11,130,'BHARATHI DOCK','OPENPAVED',75),(26,'02B-CB 2',NULL,NULL,NULL,'yes',NULL,NULL,NULL,1,0.7,10,130,'BHARATHI DOCK','OPENPAVED',75),(27,'28B-BB',NULL,NULL,NULL,NULL,NULL,NULL,'yes',1,0.9,9,180,'BHARATHI DOCK','TANKFARMS',75);
 /*!40000 ALTER TABLE `vm_berth_master` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `vm_currency_lookup`
+--
+
+DROP TABLE IF EXISTS `vm_currency_lookup`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `vm_currency_lookup` (
+  `USD` int DEFAULT NULL,
+  `INR` double DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `vm_currency_lookup`
+--
+
+LOCK TABLES `vm_currency_lookup` WRITE;
+/*!40000 ALTER TABLE `vm_currency_lookup` DISABLE KEYS */;
+INSERT INTO `vm_currency_lookup` VALUES (1,84.5);
+/*!40000 ALTER TABLE `vm_currency_lookup` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -580,7 +606,7 @@ DROP TABLE IF EXISTS `vm_dockmaster`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vm_dockmaster` (
-  `ï»¿Dock` text,
+  `Dock` text,
   `EntranceChannel` int DEFAULT NULL,
   `UOM` text
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -592,7 +618,7 @@ CREATE TABLE `vm_dockmaster` (
 
 LOCK TABLES `vm_dockmaster` WRITE;
 /*!40000 ALTER TABLE `vm_dockmaster` DISABLE KEYS */;
-INSERT INTO `vm_dockmaster` VALUES ('Bharathi Dock',75,'mts'),('Ambedkar Dock',45,'mts'),('Jawahar Dock',35,'mts');
+INSERT INTO `vm_dockmaster` VALUES ('BHARATHI DOCK',75,'mts'),('DRAMBEDKAR DOCK',45,'mts'),('JAWAHAR DOCK',35,'mts');
 /*!40000 ALTER TABLE `vm_dockmaster` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -604,7 +630,7 @@ DROP TABLE IF EXISTS `vm_pilotage_master_with_category`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vm_pilotage_master_with_category` (
-  `ï»¿GT_Min` int DEFAULT NULL,
+  `GT_Min` int DEFAULT NULL,
   `GT_Max` text,
   `Tankers` double DEFAULT NULL,
   `Container` double DEFAULT NULL,
@@ -633,7 +659,7 @@ DROP TABLE IF EXISTS `vm_port_dues`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `vm_port_dues` (
-  `ï»¿vessel_type` text,
+  `vessel_type` text,
   `coastal_rate` double DEFAULT NULL,
   `foreign_rate` double DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -658,4 +684,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-21 19:53:05
+-- Dump completed on 2025-11-21 23:56:33

@@ -57,7 +57,11 @@
           <div class="form-section">
             <h3>Vessel Details</h3>
             <div class="form-group">
-              <label for="vesselType">Vessel Type</label>
+              <label for="vesselName">Vessel Name</label>
+              <input id="vesselName">
+            </div>
+            <div class="form-group">
+              <label for="vesselType">Trade Type</label>
               <select id="vesselType">
                 <option>Foreign</option>
                 <option>Domestic</option>
@@ -86,13 +90,11 @@
             <div class="form-group">
               <label for="cargoName">Cargo Name</label>
               <select id="cargoName">
-                <option>Fertilizer</option>
-                <option>Coal</option>
-                <option>Grain</option>
+                <!-- Options will be populated dynamically by vessel.js -->
               </select>
             </div>
             <div class="form-group">
-              <label for="cargoGroup">Cargo Group</label>
+              <label for="cargoGroup">Cargo Category</label>
               <input type="text" id="cargoGroup" value="Dry Bulk" disabled>
             </div>
             <div class="form-group">
@@ -101,37 +103,29 @@
             </div>
           </div>
 
-          <div class="form-section">
-            <h3>Demurrage Details</h3>
-            <div class="form-group">
-              <label for="daysAfterFree">Days after free period</label>
-              <input type="number" id="daysAfterFree" value="10">
-            </div>
-            <div class="form-group">
-              <label for="quantityDelivered">Quantity Delivered (Tons)</label>
-              <input type="number" id="quantityDelivered" value="40000">
-            </div>
-          </div>
-
           <div class="button-group">
-            <button class="btn btn-primary" id="calculateCostBtn">Calculate Cost</button>
+            <button class="btn btn-primary" id="calculateCostBtn">Calculate Vessel Charges</button>
             <button class="btn btn-secondary" id="calculateLogisticsBtn">Calculate Logistics</button>
           </div>
         </div>
 
         <div class="right-col">
           <div id="costPanel" class="panel" aria-hidden="true">
-            <div class="section-title">Total Estimated Cost</div>
+            <div class="section-title">Total Vessel Charges</div>
             <div id="totalCostValue" class="cost-value">₹0</div>
 
-            <div class="section-title">Fare Breakdown</div>
+            <div class="section-title">Charges Breakdown</div>
             <div class="breakdown-item">
-              <span class="breakdown-label">Wharfage:</span>
-              <span id="wharfageVal" class="breakdown-value">₹0</span>
+              <span class="breakdown-label">Port Dues:</span>
+              <span id="portDuesVal" class="breakdown-value">₹0</span>
             </div>
             <div class="breakdown-item">
-              <span class="breakdown-label">Demurrage:</span>
-              <span id="demurrageVal" class="breakdown-value">₹0</span>
+              <span class="breakdown-label">Pilotage:</span>
+              <span id="pilotageVal" class="breakdown-value">₹0</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Berth Hire:</span>
+              <span id="berthHireVal" class="breakdown-value">₹0</span>
             </div>
             <div class="breakdown-item">
               <span class="breakdown-label">Sub-Total:</span>

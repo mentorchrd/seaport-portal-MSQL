@@ -6,6 +6,58 @@
   <title>Sea Port Logistic Simulator</title>
   <link rel="stylesheet" href="style.css">
 </head>
+<script>
+  function expandSignup(){
+    document.getElementById('signupCollapsed').style.display = 'none';
+    document.getElementById('signupForm').style.display = 'block';
+  }
+  async function login(){
+    const mobile = document.getElementById('loginMobile').value;
+    const password = document.getElementById('loginPassword').value;
+    await fetch('/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ mobile, password })
+    }).then(response => {
+      if(response.ok){
+        alert('Login successful!');
+        document.location.href = '/dashboard.html';
+        // Redirect or load user dashboard
+      } else {
+        alert('Login failed. Please check your credentials.');
+      }
+    });
+    // Implement actual login logic here
+  }
+  async function signup(){
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const mobile = document.getElementById('mobile').value;
+    const email = document.getElementById('email').value;
+    const company = document.getElementById('company').value;
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+
+    if(password !== confirm){
+      alert('Passwords do not match!');
+      return;
+    }
+
+    await fetch('/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstName, lastName, mobile, email, company, password })
+    }).then(response => {
+      if(response.ok){
+        alert('Signup successful! You can now log in.');
+        // Optionally redirect to login or dashboard
+      } else {
+        alert('Signup failed. Please try again.');
+      }
+    });
+    // Implement actual signup logic here
+  }
+</script>
 <body>
   <header>
     <h1>SEA PORT LOGISTIC SIMULATOR PORTAL</h1>

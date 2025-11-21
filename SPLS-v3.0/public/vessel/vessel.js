@@ -54,8 +54,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const costPanel = document.getElementById('costPanel');
   const logisticsPanel = document.getElementById('logisticsPanel');
   const totalCostValue = document.getElementById('totalCostValue');
-  const wharfageVal = document.getElementById('wharfageVal');
-  const demurrageVal = document.getElementById('demurrageVal');
+  const portDuesValEl = document.getElementById('portDuesVal');
+  const pilotageValEl = document.getElementById('pilotageVal');
+  const berthHireValEl = document.getElementById('berthHireVal');
   const subtotalVal = document.getElementById('subtotalVal');
   const taxesVal = document.getElementById('taxesVal');
   const handlingHoursEl = document.getElementById('handlingHours');
@@ -70,10 +71,63 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if(!resultsWrap){ resultsWrap = document.createElement('div'); resultsWrap.id = 'resultsWrap'; resultsWrap.style.marginTop='18px'; }
 
   // load masters: prefer server-side MySQL API (/api/:table) then fallback to CSV in /db/*.csv
-  let berthMaster = [], berthHire = [], portDues = [], pilotage = [], cargoMaster = [], currencyLookup = [];
+  let berthMaster = [], berthHire = [], portDues = [], pilotage = [], cargoDescriptions = [], currencyLookup = [];
+  let selectedCargoData = null;
+
+  async function fetchCargoDescriptions(){
+    try {
+      const res = await fetch('/api/mysql/cargo-descriptions');
+      if (res.ok) {
+        const js = await res.json();
+        if (Array.isArray(js)) return js;
+      }
+    } catch (e) {
+      console.error('Failed to fetch cargo descriptions', e);
+    }
+    // fallback to CSV if MySQL API fails
+    try {
+      const txt = await fetchText('/db/CM_CargoMaster.csv');
+      const rows = parseCSV(txt);
+      return rows.map(r => ({
+        CargoDescription: r['CargoDescription'] || r['Cargo Description'],
+        CargoCategoryName: r['CargoCategoryName'] || r['Cargo Category Name']
+      })).filter(r => r.CargoDescription);
+    } catch (err) {
+      console.error('Both MySQL and CSV fetch failed for cargo descriptions', err);
+      return [];
+    }
+  }
+
+  async function fetchCargoDetails(description) {
+    try {
+      const res = await fetch(`/api/mysql/cargo-details/${encodeURIComponent(description)}`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.error('Failed to fetch cargo details', e);
+    }
+    return null;
+  }
+
+  async function fetchWharfageRates(sorNoCode) {
+    if (!sorNoCode) return null;
+    try {
+      const res = await fetch(`/api/mysql/wharfage?sor=${encodeURIComponent(sorNoCode)}`);
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {
+      console.error('Failed to fetch wharfage rates', e);
+    }
+    return null;
+  }
 
   async function fetchRows(tableName){
-    // try API first
+    if (tableName === 'cargo_descriptions') {
+      return await fetchCargoDescriptions();
+    }
+    // For other tables, use existing API/CSV logic
     try{
       const res = await fetch('/api/' + tableName);
       if(res.ok){
@@ -83,7 +137,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }catch(e){
       // ignore and try CSV fallback
     }
-    // CSV fallback (keeps existing behavior for deployments without server API)
     try{
       const txt = await fetchText('/db/' + tableName + '.csv');
       return parseCSV(txt);
@@ -94,12 +147,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   }
 
   try{
-    [berthMaster, berthHire, portDues, pilotage, cargoMaster, currencyLookup] = await Promise.all([
+    [berthMaster, berthHire, portDues, pilotage, cargoDescriptions, currencyLookup] = await Promise.all([
       fetchRows('VM_berth_master'),
       fetchRows('VM_berth_hire'),
       fetchRows('VM_port_dues'),
       fetchRows('VM_Pilotage_Master_with_Category'),
-      fetchRows('CM_CargoMaster'),
+      fetchRows('cargo_descriptions'),
       fetchRows('VM_currency_lookup')
     ]);
   }catch(err){
@@ -130,38 +183,63 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }
   }catch(e){ console.debug('currency init failed', e); }
 
-  // Populate cargo options into either old or new select
-  try{
-    const cargoNames = [...new Set(cargoMaster.map(r=>r['Cargo Description']).filter(Boolean))].sort();
+  // Populate cargo options from cargoDescriptions
+  try {
     const target = oldCargoSelect || document.getElementById('cargoName');
-    if(target){
-      target.innerHTML = '<option value="">Select Cargo</option>';
-      cargoNames.forEach(name=>{ const opt = document.createElement('option'); opt.value = name; opt.textContent = name; target.appendChild(opt); });
-    }
-    // when cargo changes, update the cargoGroup display if present
     const cargoGroupEl = document.getElementById('cargoGroup');
-    const updateCargoGroup = (val)=>{
-      if(!val){ if(cargoGroupEl) cargoGroupEl.value = ''; return; }
-      const match = cargoMaster.find(r=> ((r['Cargo Description']||'').trim().toLowerCase() === (val||'').trim().toLowerCase()) || ((r['Cargo Short Name']||'').trim().toLowerCase() === (val||'').trim().toLowerCase()));
-      if(match){
-        // prefer Cargo Category Name, then Cargo Type Name, then Cargo Sub Category Name
-        const group = match['Cargo Category Name'] || match['Cargo Type Name'] || match['Cargo Sub Category Name'] || match['Cargo Category'] || '';
-        if(cargoGroupEl) cargoGroupEl.value = group || '';
-      } else {
-        if(cargoGroupEl) cargoGroupEl.value = '';
-      }
-    };
-    if(target){
-      target.addEventListener('change', (ev)=> updateCargoGroup(ev.target.value));
+    
+    if (target) {
+      target.innerHTML = '<option value="">Select Cargo</option>';
+      cargoDescriptions.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.CargoDescription;
+        opt.textContent = item.CargoDescription;
+        opt.dataset.category = item.CargoCategoryName || '';
+        target.appendChild(opt);
+      });
+      
+      // when cargo changes, update the cargoGroup and fetch full details
+      target.addEventListener('change', async (ev) => {
+        const val = ev.target.value;
+        if (!val) {
+          if (cargoGroupEl) cargoGroupEl.value = '';
+          selectedCargoData = null;
+          return;
+        }
+        
+        // Get category from option data attribute (faster)
+        const selectedOption = ev.target.options[ev.target.selectedIndex];
+        if (cargoGroupEl && selectedOption) {
+          cargoGroupEl.value = selectedOption.dataset.category || '';
+        }
+        
+        // Fetch full cargo details for calculations
+        selectedCargoData = await fetchCargoDetails(val);
+        
+        // Also fetch wharfage rates if we have SoRNoCode
+        if (selectedCargoData && selectedCargoData.SoRNoCode) {
+          selectedCargoData.wharfageRates = await fetchWharfageRates(selectedCargoData.SoRNoCode);
+        }
+      });
+      
       // set initial if any
-      if(target.value) updateCargoGroup(target.value);
+      if (target.value) {
+        const evt = new Event('change');
+        target.dispatchEvent(evt);
+      }
     }
-  }catch(e){
-    console.warn('could not load cargo master, using default options');
+  } catch (e) {
+    console.warn('could not load cargo descriptions, using default options');
     const fallback = oldCargoSelect || document.getElementById('cargoName');
-    if(fallback){ ['General Cargo','Bulk Cargo','Container','Liquid Bulk'].forEach(name=>{const opt=document.createElement('option');opt.value=name;opt.textContent=name;fallback.appendChild(opt);}); }
+    if (fallback) {
+      ['General Cargo', 'Bulk Cargo', 'Container', 'Liquid Bulk'].forEach(name => {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        fallback.appendChild(opt);
+      });
+    }
   }
-
   function findEligibleBerths({loa,draft,beam,cargo}){
     const isYes = v => {
       if(v==null) return false;
@@ -172,47 +250,74 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     const candidates = berthMaster.filter(b=>{
       const quay = parseFloat(b.Quay_Len) || 0;
       const berthDraft = parseFloat(b.Draft) || 0;
-      let cargoOk = true;
+      const berthBeam = parseFloat(b.Beam) || 999; // default large if not specified
+      let cargoOk = false; // default to false - must explicitly match
       if(cargo){
         const low = cargo.toLowerCase();
-        // Container requirement
+        // Map cargo to berth column requirements based on VM_berth_master structure
         if(low.includes('container')){
-          cargoOk = isYes(b.Container || b['Container'] || b['CONTAINER']);
+          cargoOk = isYes(b.Container);
         }
-        // Liquid bulk: require both Liquid_Bulk AND Bulk to be yes
-        else if(low.includes('liquid') || low.includes('tank') || low.includes('tanker')){
-          const liquid = isYes(b.Liquid_Bulk || b['Liquid_Bulk'] || b['Liquid Bulk'] || b['LIQUID_BULK']);
-          const bulk = isYes(b.Bulk || b['Bulk'] || b['Bulk_Cargo'] || b['Bulk Cargo']);
-          cargoOk = liquid && bulk;
+        else if(low.includes('liquid') && low.includes('bulk')){
+          // Liquid_Bulk cargo requires Liquid_Bulk=yes
+          cargoOk = isYes(b.Liquid_Bulk);
         }
-        // Bulk (non-liquid): require Bulk to be yes
-        else if(low.includes('bulk') || low.includes('ore') || low.includes('iron')){
-          console.debug('checking bulk for cargo',cargo);
-          cargoOk = isYes(b.Bulk || b['Bulk'] || b['Bulk_Cargo'] || b['Bulk Cargo']);
-          console.debug('bulk cargoOk=',cargoOk);
+        else if(low.includes('liquid') || low.includes('tank') || low.includes('tanker') || low.includes('oil')){
+          // Tanker/Liquid cargo requires Liquid_Bulk=yes
+          cargoOk = isYes(b.Liquid_Bulk);
         }
+        else if(low.includes('bulk') || low.includes('ore') || low.includes('iron') || low.includes('coal') || low.includes('grain')){
+          // Bulk cargo requires Bulk=yes
+          cargoOk = isYes(b.Bulk);
+        }
+        else if(low.includes('roro') || low.includes('ro-ro')){
+          cargoOk = isYes(b.RORO);
+        }
+        else if(low.includes('pol')){
+          cargoOk = isYes(b.POL);
+        }
+        else if(low.includes('passenger') || low.includes('cruise')){
+          cargoOk = isYes(b.PassnCruise);
+        }
+        else if(low.includes('bunker')){
+          cargoOk = isYes(b.Bunker);
+        }
+        else {
+          // General cargo / break bulk - accept berths that don't have specialized restrictions
+          // A berth is suitable for general cargo if it's NOT exclusively Container/Liquid_Bulk/RORO/POL/PassnCruise/Bunker
+          // but DOES have Bulk=yes OR has no specific cargo type set
+          const hasSpecializedType = isYes(b.Container) || isYes(b.Liquid_Bulk) || isYes(b.RORO) || 
+                                     isYes(b.POL) || isYes(b.PassnCruise) || isYes(b.Bunker);
+          cargoOk = !hasSpecializedType && isYes(b.Bulk);
+        }
+      } else {
+        // If no cargo specified, accept berths with Bulk=yes (general purpose)
+        cargoOk = isYes(b.Bulk);
       }
-      return quay >= loa && berthDraft >= draft && cargoOk;
+      
+      return quay >= loa && berthDraft >= draft && beam <= berthBeam && cargoOk;
     });
 
-    // sort by Quay_Len descending (larger quays first) and return up to 5 berth names
-    candidates.sort((a,b)=> (parseFloat(b.Quay_Len)||0) - (parseFloat(a.Quay_Len)||0));
-    return candidates.slice(0,5).map(c=>c.BerthName);
+    // Group berths by Dock_Name and format output
+    const dockGroups = {};
+    candidates.forEach(b => {
+      const dock = b.Dock_Name || 'Unknown Dock';
+      if(!dockGroups[dock]) dockGroups[dock] = [];
+      dockGroups[dock].push(b.BerthName);
+    });
+
+    // Format as: DOCKNAME with bullet points for berths
+    const formatted = Object.keys(dockGroups).map(dock => {
+      const berths = dockGroups[dock].slice(0, 5).map(b => ` • ${b}`).join('<br>');
+      return `<b>${dock}</b><br>${berths}`;
+    });
+
+    return formatted;
   }
 
   function getCargoRateFromMaster(cargoName){
-    if(!cargoMaster || cargoMaster.length===0) return null;
-    const name = (cargoName||'').trim().toLowerCase();
-    // try matching Cargo Description or Cargo Short Name
-    let row = cargoMaster.find(r=> (r['Cargo Description']||'').trim().toLowerCase() === name ) ||
-              cargoMaster.find(r=> (r['Cargo Short Name']||'').trim().toLowerCase() === name );
-    if(!row){
-      // try substring match
-      row = cargoMaster.find(r=> (r['Cargo Description']||'').toLowerCase().includes(name) ) ||
-            cargoMaster.find(r=> (r['Cargo Short Name']||'').toLowerCase().includes(name) );
-    }
-    if(!row) return null;
-    const v = Number(row['DSCHRG_RATE_PR_DAY']) || Number(row['LD_RATE_PR_DAY']) || null;
+    if(!selectedCargoData) return null;
+    const v = Number(selectedCargoData.DSCHRG_RATE_PR_DAY) || Number(selectedCargoData.LD_RATE_PR_DAY) || null;
     return v;
   }
 
@@ -235,7 +340,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   function lookupPortDues(gt, tradeType, cargo){
     // VM_port_dues.csv has rows per vessel_type with coastal_rate and foreign_rate
     const gtN = Number(gt)||0;
-    // map cargo keywords -> vessel_type in port dues file
     const t = (cargo||'Others').toLowerCase();
     let key = 'Others';
     if(t.includes('tanker') || t.includes('oil') || t.includes('tank')) key='Tankers';
@@ -247,10 +351,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     if(!row){ console.debug('lookupPortDues: no vessel_type row for key',key); return null; }
     const rate = tradeType==='Coastal' ? Number(row.coastal_rate) : Number(row.foreign_rate);
     if(isNaN(rate)){ console.debug('lookupPortDues: rate NaN for row',row); return null; }
-    // Interpret rate as per-GT multiplier (common for port dues). Compute amount = rate * GT
+    
+    // For Foreign: GT x Rate x Exchange Rate; For Coastal: GT x Rate
     const inrPerUsd = (window.currencyRates && window.currencyRates.INR) || 82.5;
-    const amount = gtN * rate * inrPerUsd;
-    console.debug('lookupPortDues: key',key,'rate',rate,'gt',gtN,'ER',inrPerUsd,'amount',amount);
+    const amount = tradeType === 'Coastal' ? (gtN * rate) : (gtN * rate * inrPerUsd);
+    console.debug('lookupPortDues: key',key,'rate',rate,'gt',gtN,'tradeType',tradeType,'ER',inrPerUsd,'amount',amount);
     return amount;
   }
 
@@ -258,13 +363,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     // VM_Pilotage_Master_with_Category.csv contains GT ranges with columns for Tankers, Container, RoRo, Bulk, Other and Category (Coastal/Foreign)
     const gtN = Number(gt)||0;
     const cat = (tradeType||'Foreign').trim();
-    // find GT range row for the trade category
     const row = pilotage.find(r=>{
       const min = Number(r.GT_Min)||0; const max = r.GT_Max?Number(r.GT_Max):Infinity;
       return gtN >= min && gtN <= max && r.Category && r.Category.trim().toLowerCase() === cat.toLowerCase();
     });
     if(!row){ console.debug('lookupPilotage: no pilotage row for GT',gtN,'category',cat); return null; }
-    // map cargo -> column name in pilotage CSV
     const t = (cargo||'Other').toLowerCase();
     let col = 'Other';
     if(t.includes('tanker') || t.includes('oil') || t.includes('tank')) col='Tankers';
@@ -274,10 +377,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     if(row[col]===undefined){ console.debug('lookupPilotage: column',col,'not found in pilotage row',row); return null; }
     const val = Number(row[col]);
     if(isNaN(val)){ console.debug('lookupPilotage: value NaN for col',col,'row',row); return null; }
-    // interpret value as per-GT multiplier (common); compute amount = val * GT
+    
+    // For Foreign: GT x Rate x Exchange Rate; For Coastal: GT x Rate
     const inrPerUsd = (window.currencyRates && window.currencyRates.INR) || 82.5;
-    const amount = val * gtN * inrPerUsd;
-    console.debug('lookupPilotage: col',col,'val',val,'gt',gtN,'ER',inrPerUsd,'amount',amount);
+    const amount = tradeType === 'Coastal' ? (val * gtN) : (val * gtN * inrPerUsd);
+    console.debug('lookupPilotage: col',col,'val',val,'gt',gtN,'tradeType',tradeType,'ER',inrPerUsd,'amount',amount);
     return amount;
   }
 
@@ -361,12 +465,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     else if(t.includes('bulk') || t.includes('ore') || t.includes('iron')) key='Bulk Cargo';
   const selRow = berthHire.find(r=> r.vessel_type && r.vessel_type.trim().toLowerCase() === key.trim().toLowerCase()) || berthHire[0];
   const rate = selRow ? (tradeType==='Coastal' ? Number(selRow.coastal_rate) : Number(selRow.foreign_rate)) : NaN;
-    if(isNaN(rate)){ console.debug('lookupBerthHire: no numeric rate found, row=',row); return null; }
+    if(isNaN(rate)){ console.debug('lookupBerthHire: no numeric rate found, row=',selRow); return null; }
     const inrPerUsd = (window.currencyRates && window.currencyRates.INR) || 82.5;
     const gtN = Number(gt) || 0;
-    // Apply formula: Berth Hire (INR) = GT * StayHours * Rate * ER
-    const amount = gtN * hours * rate * inrPerUsd;
-    console.debug('lookupBerthHire: key',key,'rate',rate,'gt',gtN,'hours',hours,'ER',inrPerUsd,'amount',amount);
+    // For Foreign: GT x Rate x Hours x Exchange Rate; For Coastal: GT x Rate x Hours
+    const amount = tradeType === 'Coastal' ? (gtN * hours * rate) : (gtN * hours * rate * inrPerUsd);
+    console.debug('lookupBerthHire: key',key,'rate',rate,'gt',gtN,'hours',hours,'tradeType',tradeType,'ER',inrPerUsd,'amount',amount);
     return amount;
   }
   // small helper: format INR
@@ -378,16 +482,16 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   // Chart handling
   let costChart = null;
-  function renderChart(wharfage, demurrage, taxes){
+  function renderChart(portDues, pilotage, berthHire){
     const ctx = document.getElementById('costChart');
     if(!ctx) return;
     if(costChart) costChart.destroy();
     // display values in lakhs for better readability on chart
-    const data = [wharfage/100000, demurrage/100000, taxes/100000];
+    const data = [portDues/100000, pilotage/100000, berthHire/100000];
     costChart = new Chart(ctx, {
       type: 'doughnut',
       data: {
-        labels: ['Wharfage (lakhs)','Demurrage (lakhs)','Taxes (lakhs)'],
+        labels: ['Port Dues (lakhs)','Pilotage (lakhs)','Berth Hire (lakhs)'],
         datasets: [{ data: data, backgroundColor: ['#3b82f6','#60a5fa','#93c5fd'], borderColor: 'white', borderWidth: 2 }]
       },
       options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
@@ -407,7 +511,15 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     const qty = Number(document.getElementById('weight') ? document.getElementById('weight').value : (oldForm ? (oldForm.querySelector('[name="cargoQty"]')||{value:0}).value : 0)) || 0;
     const daysAfterFree = Number(document.getElementById('daysAfterFree') ? document.getElementById('daysAfterFree').value : (document.getElementById('daysAfterFree') ? document.getElementById('daysAfterFree').value : 0)) || 0;
     const qtyDelivered = Number(document.getElementById('quantityDelivered') ? document.getElementById('quantityDelivered').value : qty) || qty;
+    if (qty > gt){
+      alert('Warning: Cargo quantity exceeds vessel GT, please verify inputs.');
+    }
+    else if (draft > (loa * 0.4) || beam > loa * 0.6){
+      alert('Warning: Possibly incorrect dimension values, please verify inputs before calculating.');
+    }
+    else {
     return { tradeType, gt, loa, draft, beam, cargo, qty, daysAfterFree, qtyDelivered };
+    }
   }
 
   // compute and render both cost & logistics
@@ -419,34 +531,32 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     const pilotageVal = lookupPilotage(inp.gt, inp.tradeType, inp.cargo) || 0;
     const berthHireVal = lookupBerthHire(stayHours, inp.gt, inp.tradeType, inp.cargo) || 0;
 
-    // demurrage: try to get rate from cargo master, fallback to default INR per ton/day
-    let demurrageRate = null;
-    try{
-      const row = cargoMaster.find(r=> (r['Cargo Description']||'').trim().toLowerCase() === (inp.cargo||'').trim().toLowerCase());
-      if(row){ demurrageRate = Number(row.DEMURRAGE_RATE_PR_DAY || row.DEMURRAGE_RATE || row.demurrage_rate) || null; }
-    }catch(e){ }
-    if(!demurrageRate || isNaN(demurrageRate)) demurrageRate = 50; // INR per ton per day default
-    const demurrageAmount = inp.daysAfterFree > 0 ? (inp.daysAfterFree * inp.qtyDelivered * demurrageRate) : 0;
-
-    const subtotal = (portDuesVal||0) + (pilotageVal||0) + (berthHireVal||0) + demurrageAmount;
+    const subtotal = (portDuesVal||0) + (pilotageVal||0) + (berthHireVal||0);
     const taxes = subtotal * 0.18;
     const total = subtotal + taxes;
 
     // update cost panel values
     if(totalCostValue) totalCostValue.textContent = formatINR(total);
-    if(wharfageVal) wharfageVal.textContent = formatINR(portDuesVal);
-    if(demurrageVal) demurrageVal.textContent = formatINR(demurrageAmount);
+    if(portDuesValEl) portDuesValEl.textContent = formatINR(portDuesVal);
+    if(pilotageValEl) pilotageValEl.textContent = formatINR(pilotageVal);
+    if(berthHireValEl) berthHireValEl.textContent = formatINR(berthHireVal);
     if(subtotalVal) subtotalVal.textContent = formatINR(subtotal);
     if(taxesVal) taxesVal.textContent = formatINR(taxes);
 
     // update logistics panel
     if(handlingHoursEl) handlingHoursEl.textContent = String(stayHours);
-    if(berthsList) berthsList.innerHTML = '<div class="logistics-item-label">' + (berths.length? berths.join(', ') : 'No suitable berths found') + '</div>';
+    if(berthsList) {
+      if(berths.length) {
+        berthsList.innerHTML = berths.map(b => '<div class="logistics-item-label">' + b + '</div>').join('');
+      } else {
+        berthsList.innerHTML = '<div class="logistics-item-label">No suitable berths found</div>';
+      }
+    }
 
     // render chart (values in INR converted to lakhs for chart)
-    renderChart(portDuesVal, demurrageAmount, taxes);
+    renderChart(portDuesVal, pilotageVal, berthHireVal);
 
-    return { berths, stayHours, amounts: { portDuesVal, pilotageVal, berthHireVal, demurrageAmount, subtotal, taxes, total } };
+    return { berths, stayHours, amounts: { portDuesVal, pilotageVal, berthHireVal, subtotal, taxes, total } };
   }
 
   // wire buttons
