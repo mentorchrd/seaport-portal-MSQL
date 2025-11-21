@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sea Port Logistic Simulator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>SEA PORT LOGISTIC SIMULATOR PORTAL</h1>
+  </header>
+
+  <div class="container">
+    <!-- Login Box -->
+    <div class="box login-box">
+      <h2>Login</h2>
+      <input type="text" id="loginMobile" placeholder="Mobile Number (User ID)" />
+      <input type="password" id="loginPassword" placeholder="Password" />
+      <button onclick="login()">Login</button>
+    </div>
+
+    <!-- Center Graphic Box -->
+    <div class="center-box">
+      <div class="graphic-icon">
+        🌊⚓🚢
+      </div>
+      <p><strong>A Single Window Facility for<br>Planning the Logistics and Cost of Handling<br>At SeaPort</strong></p>
+    </div>
+
+    <!-- Signup Box -->
+    <div class="box signup-box" id="signupBox">
+      <h2>Signup</h2>
+      <div id="signupCollapsed">
+        <button onclick="expandSignup()">Signup</button>
+      </div>
+      <div id="signupForm" style="display: none;">
+        <input type="text" placeholder="First Name" id="firstName" />
+        <input type="text" placeholder="Last Name" id="lastName" />
+        <input type="text" placeholder="Mobile Number" id="mobile" />
+        <input type="email" placeholder="Email" id="email" />
+        <input type="text" placeholder="Company Name" id="company" />
+        <input type="password" placeholder="Password" id="password" />
+        <input type="password" placeholder="Confirm Password" id="confirm" />
+        <button onclick="signup()">Register</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>For any Queries contact at:<br><strong>splsimulator@gmail.com</strong></p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

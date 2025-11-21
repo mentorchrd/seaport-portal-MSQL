@@ -1,0 +1,7 @@
+﻿code,cranage_type,CRNrate,TradeType,RateType
+CRN01F,Dry Bulk Cargoes,15.3,foreign,
+CRN01C,Dry Bulk Cargoes,9.2,coastal,
+CRN02F,Break Bulk-Upto 30T,30.6,foreign,
+CRN02C,Break Bulk-Upto 30T,18.4,coastal,
+CRN03F,Break Bulk-Above 30T,50.9,foreign,
+CRN03C,Break Bulk-Above 30T,30.5,coastal,

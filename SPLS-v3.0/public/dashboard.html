@@ -1,0 +1,108 @@
+<!-- public/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - Sea Port Simulator</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f9ff;
+    }
+
+    header {
+      background: #003366;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      position: relative;
+    }
+
+    .signout {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .signout:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px;
+      padding: 40px;
+      max-width: 1000px;
+      margin: auto;
+    }
+
+    .card {
+      background: white;
+      padding: 30px 20px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: 0.3s ease;
+      text-decoration: none;
+      color: #003366;
+    }
+
+    .card:hover {
+      background: #e6f0ff;
+      transform: translateY(-5px);
+    }
+
+    .card i {
+      font-size: 40px;
+      margin-bottom: 15px;
+    }
+
+    .card h3 {
+      margin: 10px 0 0;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Sea Port Logistic Simulator Dashboard</h1>
+    <a class="signout" href="/logout"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+  </header>
+
+  <div class="dashboard">
+    <a href="/vessel" class="card">
+      <i class="fas fa-ship"></i>
+      <h3>Vessel Simulator</h3>
+    </a>
+    <a href="/cargo" class="card">
+      <i class="fas fa-cubes"></i>
+      <h3>Cargo Simulator</h3>
+    </a>
+    <a href="/labour" class="card">
+      <i class="fas fa-hard-hat"></i>
+      <h3>Labour Simulator</h3>
+    </a>
+    <a href="/storage" class="card">
+      <i class="fas fa-warehouse"></i>
+      <h3>Storage Simulator</h3>
+    </a>
+    <a href="/rail" class="card">
+      <i class="fas fa-train"></i>
+      <h3>Rail Simulator</h3>
+    </a>
+  </div>
+</body>
+</html>
