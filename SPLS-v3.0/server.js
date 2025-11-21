@@ -10,6 +10,31 @@ const PORT = 3000;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
+// Serve db folder so client-side scripts can fetch CSV files under /db
+app.use('/db', express.static(path.join(__dirname, 'db')));
+
+// API endpoints to read tables from MySQL (fallback to CSV removed on server-side)
+const allowedTables = new Set([
+  'VM_berth_master',
+  'VM_berth_hire',
+  'VM_port_dues',
+  'VM_Pilotage_Master_with_Category',
+  'CM_CargoMaster',
+  'VM_currency_lookup'
+]);
+
+app.get('/api/:table', (req, res) => {
+  const table = req.params.table;
+  if (!allowedTables.has(table)) return res.status(404).json({ error: 'table not allowed' });
+  // Simple select all — the client expects all rows (same columns as CSV)
+  db.query(`SELECT * FROM ??`, [table], (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
 
 app.post("/signup", async (req, res) => {
   const { firstName, lastName, mobile, email, company, password } = req.body;
