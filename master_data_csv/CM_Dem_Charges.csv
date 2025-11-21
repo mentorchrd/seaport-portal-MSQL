@@ -1,0 +1,51 @@
+﻿demChrgCode,DemCargo,OprType,TradeType,StrType,DemStart_day,DemEnd_day,dem_rate,RateType
+DMCHNC01,non-container,import,both,open,1,7,29.00,INR
+DMCHNC02,non-container,import,both,open,8,17,58.00,INR
+DMCHNC03,non-container,import,both,open,18,30,86.99,INR
+DMCHNC04,non-container,import,both,open,30,999,176.02,INR
+DMCHNC05,non-container,import,both,covered,1,7,43.55,INR
+DMCHNC06,non-container,import,both,covered,8,17,87.09,INR
+DMCHNC07,non-container,import,both,covered,18,30,130.64,INR
+DMCHNC08,non-container,import,both,covered,30,999,264.53,INR
+DMCHNC09,non-container,export,both,open,1,7,29.00,INR
+DMCHNC10,non-container,export,both,open,8,10,58.00,INR
+DMCHNC11,non-container,export,both,open,11,999,176.02,INR
+DMCHNC12,non-container,export,both,covered,1,7,43.55,INR
+DMCHNC13,non-container,export,both,covered,8,10,87.09,INR
+DMCHNC14,non-container,export,both,covered,11,999,264.53,INR
+DMCHCT01,container 20 ft,both,foreign,any,4,15,5.60,USD
+DMCHCT02,container 40 ft,both,foreign,any,4,15,11.10,USD
+DMCHCT03,container above 40 ft,both,foreign,any,4,15,16.70,USD
+DMCHCT04,container 20 ft,both,foreign,any,16,30,11.10,USD
+DMCHCT05,container 40 ft,both,foreign,any,16,30,22.20,USD
+DMCHCT06,container above 40 ft,both,foreign,any,16,30,33.30,USD
+DMCHCT07,container 20 ft,both,foreign,any,31,999,22.40,USD
+DMCHCT08,container 40 ft,both,foreign,any,31,999,44.40,USD
+DMCHCT09,container above 40 ft,both,foreign,any,31,999,66.60,USD
+DMCHCT10,container 20 ft,both,coastal,any,4,15,147.10,INR
+DMCHCT11,container 40 ft,both,coastal,any,4,15,294.20,INR
+DMCHCT12,container above 40 ft,both,coastal,any,4,15,441.30,INR
+DMCHCT13,container 20 ft,both,coastal,any,16,30,294.20,INR
+DMCHCT14,container 40 ft,both,coastal,any,16,30,588.40,INR
+DMCHCT15,container above 40 ft,both,coastal,any,16,30,882.50,INR
+DMCHCT16,container 20 ft,both,coastal,any,31,999,588.40,INR
+DMCHCT17,container 40 ft,both,coastal,any,31,999,1176.70,INR
+DMCHCT18,container above 40 ft,both,coastal,any,31,999,1765.00,INR
+DMCHTS01,transhipment ICD container 20 ft,both,foreign,any,16,30,5.60,USD
+DMCHTS02,transhipment ICD container 40 ft,both,foreign,any,16,30,11.10,USD
+DMCHTS03,transhipment ICD container above 40 ft,both,foreign,any,16,30,16.70,USD
+DMCHTS04,transhipment ICD container 20 ft,both,foreign,any,31,45,11.10,USD
+DMCHTS05,transhipment ICD container 40 ft,both,foreign,any,31,45,22.20,USD
+DMCHTS06,transhipment ICD container above 40 ft,both,foreign,any,31,45,33.30,USD
+DMCHTS07,transhipment ICD container 20 ft,both,foreign,any,46,999,22.40,USD
+DMCHTS08,transhipment ICD container 40 ft,both,foreign,any,46,999,44.40,USD
+DMCHTS09,transhipment ICD container above 40 ft,both,foreign,any,46,999,66.60,USD
+DMCHTS10,transhipment ICD container 20 ft,both,coastal,any,16,30,147.10,INR
+DMCHTS11,transhipment ICD container 40 ft,both,coastal,any,16,30,294.20,INR
+DMCHTS12,transhipment ICD container above 40 ft,both,coastal,any,16,30,441.30,INR
+DMCHTS13,transhipment ICD container 20 ft,both,coastal,any,31,45,294.20,INR
+DMCHTS14,transhipment ICD container 40 ft,both,coastal,any,31,45,588.40,INR
+DMCHTS15,transhipment ICD container above 40 ft,both,coastal,any,31,45,882.50,INR
+DMCHTS16,transhipment ICD container 20 ft,both,coastal,any,46,999,588.40,INR
+DMCHTS17,transhipment ICD container 40 ft,both,coastal,any,46,999,1176.70,INR
+DMCHTS18,transhipment ICD container above 40 ft,both,coastal,any,46,999,1765.00,INR

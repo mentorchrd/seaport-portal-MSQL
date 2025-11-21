@@ -1,0 +1,8 @@
+﻿RltyCargo_Type,Stevedoring_Royalty,UOM,ShoreHanding_Royalty,UOM
+Dry Bulk,3.25,ton,3.25,ton
+Break Bulk except Automobiles,3.25,ton,3.25,ton
+Automobiles - Upto 4 wheelers,4.33,vehicle,4.33,vehicle
+Automobiles - Above 4 wheelers,13,vehicle,13,vehicle
+MAFI,13,vehicle,13,vehicle
+Container -Laden,86.71,TEU,86.71,TEU
+Container -Empty,10.84,TEU,10.84,TEU

@@ -1,0 +1,7 @@
+﻿Time_start_HRS,Time_end_HRS,Dem_Rate,Dem_UOM
+0.00,6.00,150,wagon
+6.01,12.00,165,wagon
+12.01,24.00,188,wagon
+24.01,48.00,225,wagon
+48.01,72.00,300,wagon
+72.01,999.00,450,wagon
