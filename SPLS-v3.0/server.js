@@ -23,6 +23,56 @@ const allowedTables = new Set([
   'VM_currency_lookup'
 ]);
 
+
+// Dedicated endpoint for CM_CargoMaster from MySQL
+app.get('/api/mysql/cargomaster', (req, res) => {
+  db.query('SELECT * FROM cm_cargomaster', (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
+
+// Endpoint to get cargo descriptions for dropdown
+app.get('/api/mysql/cargo-descriptions', (req, res) => {
+  db.query('SELECT DISTINCT CargoDescription, CargoCategoryName FROM cm_cargomaster WHERE CargoDescription IS NOT NULL ORDER BY CargoDescription', (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
+
+// Endpoint to get cargo details by description
+app.get('/api/mysql/cargo-details/:description', (req, res) => {
+  const desc = req.params.description;
+  db.query('SELECT * FROM cm_cargomaster WHERE CargoDescription = ? LIMIT 1', [desc], (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results.length > 0 ? results[0] : null);
+  });
+});
+
+// Endpoint to get wharfage rates by SoRNoCode
+app.get('/api/mysql/wharfage', (req, res) => {
+  const sorCode = req.query.sor;
+  if (!sorCode) {
+    return res.status(400).json({ error: 'missing sor query parameter' });
+  }
+  db.query('SELECT * FROM cm_wharfage_master WHERE sor_item = ? LIMIT 1', [sorCode], (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results.length > 0 ? results[0] : null);
+  });
+});
+
 app.get('/api/:table', (req, res) => {
   const table = req.params.table;
   if (!allowedTables.has(table)) return res.status(404).json({ error: 'table not allowed' });
