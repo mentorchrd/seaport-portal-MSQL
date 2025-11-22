@@ -43,7 +43,9 @@
   <div class="header">
     <h1>Seaport Cargo Module</h1>
   </div>
-
+  <div class="backButton">
+    <button class="btn btn-primary" onclick="window.location.href='../index.html'">← Back to Main Menu</button>
+  </div>
   <div class="container">
     <div class="main-grid">
       <div class="form-card">
@@ -140,34 +142,65 @@
               </select>
             </div>
             <div class="form-group">
-              <label for="containerSize">Container Size</label>
-              <select id="containerSize">
-                <option>Upto 20 Feet</option>
-                <option>20-40 Feet</option>
-                <option>Above 40 Feet</option>
-              </select>
-            </div>
-            <div class="form-group" id="containerStatusGroup">
-              <label for="containerStatus">Status</label>
-              <select id="containerStatus">
-                <option>Empty</option>
-                <option>Laden</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="containerQuantity">Number of Containers</label>
-              <input type="number" id="containerQuantity" value="10">
-            </div>
-            <div class="form-group hidden" id="cargoValueGroup">
-              <label for="cargoValue">Cargo Value (INR)</label>
-              <input type="number" id="cargoValue" value="0">
-            </div>
-            <div class="form-group">
               <label for="containerTradeType">Trade Type</label>
               <select id="containerTradeType">
                 <option>Foreign</option>
                 <option>Coastal</option>
               </select>
+            </div>
+          </div>
+
+          <!-- Standard/MAFI Container Inputs -->
+          <div id="standardContainerInputs">
+            <div class="form-section">
+              <h3>Up to 20 Feet</h3>
+              <div class="form-group">
+                <label for="container20Empty">Empty Containers</label>
+                <input type="number" id="container20Empty" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="container20Laden">Laden Containers</label>
+                <input type="number" id="container20Laden" value="0" min="0">
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>20-40 Feet</h3>
+              <div class="form-group">
+                <label for="container2040Empty">Empty Containers</label>
+                <input type="number" id="container2040Empty" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="container2040Laden">Laden Containers</label>
+                <input type="number" id="container2040Laden" value="0" min="0">
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Above 40 Feet</h3>
+              <div class="form-group">
+                <label for="container40PlusEmpty">Empty Containers</label>
+                <input type="number" id="container40PlusEmpty" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="container40PlusLaden">Laden Containers</label>
+                <input type="number" id="container40PlusLaden" value="0" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipper Own Container Inputs -->
+          <div id="shipperOwnInputs" class="hidden">
+            <div class="form-section">
+              <h3>Cargo Value</h3>
+              <div class="form-group">
+                <label for="shipperOwnCargoValue">Total Cargo Value (INR)</label>
+                <input type="number" id="shipperOwnCargoValue" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="shipperOwnContainers">Total Containers</label>
+                <input type="number" id="shipperOwnContainers" value="0" min="0">
+              </div>
             </div>
           </div>
 

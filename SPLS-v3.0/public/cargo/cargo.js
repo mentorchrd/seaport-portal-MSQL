@@ -60,13 +60,14 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const containerModeSection = document.getElementById('containerModeSection');
   const modeRadios = document.querySelectorAll('input[name="cargoMode"]');
   const containerTypeSelect = document.getElementById('containerType');
-  const containerStatusGroup = document.getElementById('containerStatusGroup');
-  const cargoValueGroup = document.getElementById('cargoValueGroup');
+  const standardContainerInputs = document.getElementById('standardContainerInputs');
+  const shipperOwnInputs = document.getElementById('shipperOwnInputs');
 
   let cargoDescriptions = [];
   let selectedCargoData = null;
   let berthMaster = [];
   let demCharges = [];
+  let exchangeRate = 88.46; // Default USD to INR rate
   let currentMode = 'cargo';
 
   // Mode switching logic
@@ -87,11 +88,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   containerTypeSelect.addEventListener('change', (e) => {
     const type = e.target.value;
     if(type === 'Shipper Own'){
-      containerStatusGroup.classList.add('hidden');
-      cargoValueGroup.classList.remove('hidden');
+      standardContainerInputs.classList.add('hidden');
+      shipperOwnInputs.classList.remove('hidden');
     } else {
-      containerStatusGroup.classList.remove('hidden');
-      cargoValueGroup.classList.add('hidden');
+      standardContainerInputs.classList.remove('hidden');
+      shipperOwnInputs.classList.add('hidden');
     }
   });
 
@@ -180,12 +181,29 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     }
   }
 
+  async function fetchExchangeRate() {
+    try {
+      const txt = await fetchText('/db/ExchangeRateMaster.csv');
+      const rows = parseCSV(txt);
+      if (rows.length > 0) {
+        // Get the latest rate (last row)
+        const latest = rows[rows.length - 1];
+        return Number(latest.ExchangeRate) || 88.46;
+      }
+    } catch (e) {
+      console.error('Failed to fetch exchange rate', e);
+    }
+    return 88.46; // Default rate
+  }
+
   try {
-    [cargoDescriptions, demCharges, berthMaster] = await Promise.all([
+    [cargoDescriptions, demCharges, berthMaster, exchangeRate] = await Promise.all([
       fetchCargoDescriptions(),
       fetchDemCharges(),
-      fetchRows('VM_berth_master')
+      fetchRows('VM_berth_master'),
+      fetchExchangeRate()
     ]);
+    console.debug('Exchange rate loaded:', exchangeRate);
   } catch(err) {
     console.error('Error loading masters', err);
   }
@@ -231,7 +249,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   function lookupWharfage(weight, tradeType, cargoValue) {
     if (currentMode === 'container') {
-      return calculateContainerWharfage();
+      const result = calculateContainerWharfage();
+      return result.total;
     }
 
     if (!selectedCargoData || !selectedCargoData.wharfageRates) {
@@ -241,7 +260,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     
     const rates = selectedCargoData.wharfageRates;
     const costBasis = rates.Cost_basis || 'Weight';
-    const rate = tradeType === 'Foreign' ? Number(rates.coastal_rate) : Number(rates.foreign_rate);
+    const rate = tradeType === 'Coastal' ? Number(rates.coastal_rate) : Number(rates.foreign_rate);
     
     if (isNaN(rate)) {
       console.debug('lookupWharfage: invalid rate', rates);
@@ -268,16 +287,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   function calculateContainerWharfage() {
     const containerType = document.getElementById('containerType').value;
-    const containerSize = document.getElementById('containerSize').value;
-    const containerStatus = document.getElementById('containerStatus').value;
-    const quantity = Number(document.getElementById('containerQuantity').value) || 0;
     const tradeType = document.getElementById('containerTradeType').value;
-    const cargoValue = Number(document.getElementById('cargoValue').value) || 0;
 
     if (containerType === 'Shipper Own') {
       // Ad valorem for shipper own containers
+      const cargoValue = Number(document.getElementById('shipperOwnCargoValue').value) || 0;
       const rate = tradeType === 'Foreign' ? 0.4250 : 0.2550;
-      return (cargoValue * rate / 100);
+      return { total: (cargoValue * rate / 100), containers: {} };
     }
 
     // Standard and MAFI containers - use fixed rates
@@ -308,8 +324,30 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       }
     };
 
-    const rate = rateTable[containerType]?.[containerStatus]?.[containerSize]?.[tradeType] || 0;
-    return quantity * rate;
+    // Read container quantities from form
+    const containers = {
+      '20Empty': Number(document.getElementById('container20Empty').value) || 0,
+      '20Laden': Number(document.getElementById('container20Laden').value) || 0,
+      '2040Empty': Number(document.getElementById('container2040Empty').value) || 0,
+      '2040Laden': Number(document.getElementById('container2040Laden').value) || 0,
+      '40PlusEmpty': Number(document.getElementById('container40PlusEmpty').value) || 0,
+      '40PlusLaden': Number(document.getElementById('container40PlusLaden').value) || 0
+    };
+
+    // Calculate wharfage for each category
+    let totalWharfage = 0;
+    const rates = rateTable[containerType];
+    
+    totalWharfage += containers['20Empty'] * (rates['Empty']['Upto 20 Feet'][tradeType] || 0);
+    totalWharfage += containers['20Laden'] * (rates['Laden']['Upto 20 Feet'][tradeType] || 0);
+    totalWharfage += containers['2040Empty'] * (rates['Empty']['20-40 Feet'][tradeType] || 0);
+    totalWharfage += containers['2040Laden'] * (rates['Laden']['20-40 Feet'][tradeType] || 0);
+    totalWharfage += containers['40PlusEmpty'] * (rates['Empty']['Above 40 Feet'][tradeType] || 0);
+    totalWharfage += containers['40PlusLaden'] * (rates['Laden']['Above 40 Feet'][tradeType] || 0);
+
+    console.debug('Container wharfage breakdown:', containers, 'total:', totalWharfage);
+    
+    return { total: totalWharfage, containers: containers };
   }
 
   function calculateDemurrage(daysAfterFree, quantity, operationType, storageType, tradeType, demCargo) {
@@ -318,9 +356,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     // Find matching demurrage slab
     const matching = demCharges.filter(row => {
       const cargoMatch = row.DemCargo && row.DemCargo.toLowerCase().includes(demCargo.toLowerCase());
-      const oprMatch = row.OprType === 'both' || row.OprType === operationType;
+      const oprMatch = row.OprType === 'both' || row.OprType.toLowerCase() === operationType.toLowerCase();
       const tradeMatch = row.TradeType === 'both' || row.TradeType.toLowerCase() === tradeType.toLowerCase();
-      const strMatch = row.StrType === 'any' || row.StrType === storageType;
+      const strMatch = row.StrType === 'any' || row.StrType.toLowerCase() === storageType.toLowerCase();
       
       return cargoMatch && oprMatch && tradeMatch && strMatch;
     });
@@ -347,12 +385,18 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       // Calculate days in this slab
       const daysInSlab = Math.min(remainingDays, slabEnd - slabStart + 1);
       
-      // Apply rate
-      const slabAmount = quantity * daysInSlab * slabRate;
+      // Apply rate and convert USD to INR if needed
+      let slabAmount = quantity * daysInSlab * slabRate;
+      const rateType = slab.RateType || 'INR';
+      if (rateType.toUpperCase() === 'USD') {
+        slabAmount = slabAmount * exchangeRate;
+        console.debug(`Demurrage slab: days ${slabStart}-${slabEnd}, rate $${slabRate} (₹${(slabRate * exchangeRate).toFixed(2)}), daysInSlab ${daysInSlab}, amount ₹${slabAmount.toFixed(2)}`);
+      } else {
+        console.debug(`Demurrage slab: days ${slabStart}-${slabEnd}, rate ₹${slabRate}, daysInSlab ${daysInSlab}, amount ₹${slabAmount}`);
+      }
+      
       totalDemurrage += slabAmount;
       remainingDays -= daysInSlab;
-
-      console.debug(`Demurrage slab: days ${slabStart}-${slabEnd}, rate ${slabRate}, daysInSlab ${daysInSlab}, amount ${slabAmount}`);
     }
 
     return totalDemurrage;
@@ -435,7 +479,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       if(name.includes('grain') || name.includes('food')) rateMtPerDay = 800;
       if(name.includes('iron') || name.includes('ore')) rateMtPerDay = 2500;
       if(name.includes('cement') || name.includes('clinker')) rateMtPerDay = 1200;
-      if(name.includes('container')) rateMtPerDay = 400;
+      // quantity is 10 containers/hr which means rate is 240 containers/day
+      if(name.includes('container')) {
+        console.debug('Setting rateMtPerDay for container to 240');
+        console.debug('hours  '+ quantity+' containers is '+ Math.round(Math.max((quantity || 0) / rateMtPerDay, 0.1)*24));
+        rateMtPerDay = 240;
+      }
       if(name.includes('liquid') || name.includes('oil') || name.includes('diesel') || name.includes('tank')) rateMtPerDay = 5000;
     }
 
@@ -484,13 +533,31 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     } else {
       // Container mode
       const tradeType = document.getElementById('containerTradeType').value;
-      const quantity = Number(document.getElementById('containerQuantity').value) || 0;
       const daysAfterFree = Number(document.getElementById('containerDaysAfterFree').value) || 0;
       const operationType = document.getElementById('containerOperationType').value;
       const loa = Number(document.getElementById('containerLoa').value) || 0;
       const draft = Number(document.getElementById('containerDraft').value) || 0;
       const beam = Number(document.getElementById('containerBeam').value) || 0;
-      const cargoValue = Number(document.getElementById('cargoValue').value) || 0;
+      
+      const containerType = document.getElementById('containerType').value;
+      let quantity = 0;
+      let cargoValue = 0;
+      
+      if (containerType === 'Shipper Own') {
+        cargoValue = Number(document.getElementById('shipperOwnCargoValue').value) || 0;
+        quantity = Number(document.getElementById('shipperOwnContainers').value) || 0;
+      } else {
+        // Calculate total containers from all size categories
+        const container20Empty = Number(document.getElementById('container20Empty').value) || 0;
+        const container20Laden = Number(document.getElementById('container20Laden').value) || 0;
+        const container2040Empty = Number(document.getElementById('container2040Empty').value) || 0;
+        const container2040Laden = Number(document.getElementById('container2040Laden').value) || 0;
+        const container40PlusEmpty = Number(document.getElementById('container40PlusEmpty').value) || 0;
+        const container40PlusLaden = Number(document.getElementById('container40PlusLaden').value) || 0;
+        
+        quantity = container20Empty + container20Laden + container2040Empty + 
+                   container2040Laden + container40PlusEmpty + container40PlusLaden;
+      }
       
       return { tradeType, weight: quantity, daysAfterFree, qtyDelivered: quantity, 
                operationType, storageType: 'any', loa, draft, beam, cargo: 'container', cargoValue };
@@ -501,7 +568,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     const inp = readInputs();
     
     // Calculate wharfage
-    const wharfageVal = lookupWharfage(inp.weight, inp.tradeType, inp.cargoValue) || 0;
+    let wharfageVal = 0;
+    if (currentMode === 'container') {
+      const result = calculateContainerWharfage();
+      wharfageVal = result.total;
+    } else {
+      wharfageVal = lookupWharfage(inp.weight, inp.tradeType, inp.cargoValue) || 0;
+    }
 
     // Determine cargo category for demurrage
     let demCargo = 'non-container';
