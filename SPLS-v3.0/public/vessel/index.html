@@ -11,6 +11,10 @@
     <style>
       /* Aggressively compact layout so left side won't need scrolling */
       html, body { height: 100%; }
+      nav { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        nav a { color: #1a1a1a; text-decoration: none; padding: 0.25rem 0.75rem; border-radius: 0.3rem; font-size: 0.9rem; }
+        nav a:hover { background-color: rgba(255,255,255,0.3); }
+        nav a.active { background-color: rgba(255,255,255,0.5); font-weight: 600; }
       * { margin: 0; padding: 0; box-sizing: border-box; }
       body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(to bottom, #87CEEB, #ADD8E6); height: 100%; overflow: hidden; font-size: 13px; }
       .header { background-color: #87CEEB; padding: 0.5rem 0.5rem; text-align: center; border-bottom: 1px solid #B0E0E6; }
@@ -51,7 +55,6 @@
 
     <div class="container">
        <div class="header">
-        <h1>Stevedore Module</h1>
         <nav>
             <a href="../index.html">Home</a>
             <a href="../vessel/index.html">Vessel</a>
