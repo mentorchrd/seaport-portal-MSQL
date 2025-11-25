@@ -1,0 +1,27 @@
+﻿Category,Cargo,StowageFactorRagne,SFRUOM,StowageFactor,SFUOM,DensityRange,DRUOM,Density,DUOM,StackingHeight ,SHUOM,TonnageRange,TRUOM,Measure,UOM,Area1,Area2,Area3,Area4,IIISec
+Dry Bulk,Iron Ore,0.40 – 0.50,Cubic mts,0.5,Cubic mts,2.00 – 2.50,Cubic mts,2.5,Cubic mts,3,metre,6.0 – 7.5,TON PER SQ MTS,7.5,tons,Yes,No,No,No,No
+Dry Bulk,Coal,1.30 – 1.50,Cubic mts,1.5,Cubic mts,0.67 – 0.77,Cubic mts,0.77,Cubic mts,3,metre,2.0 – 2.3,TON PER SQ MTS,2.3,tons,No,No,No,No,Yes
+Dry Bulk,Limestone,0.90 – 1.00,Cubic mts,1,Cubic mts,1.00 – 1.11,Cubic mts,1.11,Cubic mts,3,metre,3.0 – 3.33,TON PER SQ MTS,3.33,tons,No,No,No,No,Yes
+Dry Bulk,Cement (Bulk),0.63 – 0.83,Cubic mts,0.83,Cubic mts,1.20 – 1.59,Cubic mts,1.59,Cubic mts,3,metre,3.6 – 4.77,TON PER SQ MTS,4.77,tons,No,No,No,No,Yes
+Dry Bulk,Fertilizer (Urea),0.80 – 1.00,Cubic mts,1,Cubic mts,1.00 – 1.25,Cubic mts,1.25,Cubic mts,3,metre,3.0 – 3.75,TON PER SQ MTS,3.75,tons,No,No,Yes,Yes,Yes
+Dry Bulk,Wheat,1.30 – 1.40,Cubic mts,1.4,Cubic mts,0.71 – 0.77,Cubic mts,0.77,Cubic mts,3,metre,2.1 – 2.3,TON PER SQ MTS,2.3,tons,No,Yes,Yes,No,No
+Dry Bulk,Rice,1.40 – 1.60,Cubic mts,1.6,Cubic mts,0.63 – 0.71,Cubic mts,0.71,Cubic mts,3,metre,1.9 – 2.1,TON PER SQ MTS,2.1,tons,No,Yes,Yes,No,No
+Dry Bulk,Raw Sugar,1.20 – 1.40,Cubic mts,1.4,Cubic mts,0.71 – 0.83,Cubic mts,0.83,Cubic mts,3,metre,2.1 – 2.5,TON PER SQ MTS,2.5,tons,No,Yes,Yes,No,No
+Dry Bulk,Salt,1.10 – 1.20,Cubic mts,1.2,Cubic mts,0.83 – 0.91,Cubic mts,0.91,Cubic mts,3,metre,2.5 – 2.7,TON PER SQ MTS,2.7,tons,No,No,Yes,Yes,Yes
+Break Bulk,Steel Coils,0.35 – 0.55,Cubic mts,0.55,Cubic mts,1.82 – 2.86,Cubic mts,2.86,Cubic mts,2.5,metre,4.5 – 7.1,TON PER SQ MTS,7.1,tons,Yes,Yes,Yes,No,No
+Break Bulk,Steel Plates,0.45 – 0.55,Cubic mts,0.55,Cubic mts,1.82 – 2.22,Cubic mts,2.22,Cubic mts,2.5,metre,4.5 – 5.5,TON PER SQ MTS,5.5,tons,Yes,Yes,Yes,Yes,Yes
+Break Bulk,Bagged Cement,1.00 – 1.40,Cubic mts,1.4,Cubic mts,0.71 – 1.00,Cubic mts,1,Cubic mts,2.5,metre,1.8 – 2.5,TON PER SQ MTS,2.5,tons,No,Yes,Yes,Yes,No
+Break Bulk,Bagged Fertilizer,1.20 – 1.35,Cubic mts,1.35,Cubic mts,0.74 – 0.83,Cubic mts,0.83,Cubic mts,2.5,metre,1.85 – 2.08,TON PER SQ MTS,2.08,tons,No,Yes,Yes,Yes,No
+Break Bulk,Timber Logs,1.60 – 3.00,Cubic mts,3,Cubic mts,0.33 – 0.63,Cubic mts,0.63,Cubic mts,2.5,metre,0.83 – 1.58,TON PER SQ MTS,1.58,tons,No,No,Yes,Yes,Yes
+Break Bulk,Timber Sawn,1.20 – 2.00,Cubic mts,2,Cubic mts,0.50 – 0.83,Cubic mts,0.83,Cubic mts,2.5,metre,1.25 – 2.08,TON PER SQ MTS,2.08,tons,Yes,Yes,Yes,Yes,Yes
+Break Bulk,Paper Rolls,1.50 – 2.00,Cubic mts,2,Cubic mts,0.50 – 0.67,Cubic mts,0.67,Cubic mts,2.5,metre,1.25 – 1.67,TON PER SQ MTS,1.67,tons,No,Yes,No,No,No
+Container,20 Feet,1.00 – 1.40,Cubic mts,1.4,Cubic mts,0.71 – 1.00,Cubic mts,1,Cubic mts,11.58,metre,14.8 -14.10,TON PER SQ MTS,14.8,Square mts,No,No,No,Yes,No
+Container,40 Feet,1.20 – 1.35,Cubic mts,1.35,Cubic mts,0.74 – 0.83,Cubic mts,0.83,Cubic mts,11.58,metre,29.7 -30.0,TON PER SQ MTS,29.7,Square mts,No,No,No,Yes,No
+Container,45 Feet,1.30 – 1.60,Cubic mts,1.6,Cubic mts,0.63 – 0.77,Cubic mts,0.77,Cubic mts,11.58,metre,33.4 -34.0,TON PER SQ MTS,33.4,Square mts,No,No,No,Yes,No
+Container,60 Feet,3.00 – 5.00,Cubic mts,5,Cubic mts,0.20 – 0.33,Cubic mts,0.33,Cubic mts,11.58,metre,44.6 - 45.0,TON PER SQ MTS,44.6,Square mts,No,No,No,Yes,No
+Break Bulk,Car,12.5 – 18,Square mts,18,Square mts,0,no unit,0,no unit,3,metre,0.06 - 0.13,0,18,Square mts,Yes,No,No,No,No
+Break Bulk,Bus,36 – 52.5,Square mts,52.5,Square mts,0,no unit,0,no unit,5,metre,0.19 - 0.48,0,52.5,Square mts,Yes,No,No,No,No
+Break Bulk,Excavator,30 – 45.5,Square mts,45.5,Square mts,0,no unit,0,no unit,6,metre,0.44 - 0.77,0,45.5,Square mts,Yes,No,No,No,No
+Liquid Bulk,POL,1.05 – 1.43,Cubic mts,1.43,Cubic mts,0,no unit,0,no unit,0,no unit,0.70 – 0.95,TON PER SQ MTS,0.95,Square mts,Yes,No,No,Yes,No
+Liquid Bulk,Edible Oil,1.07 – 1.11,Cubic mts,1.1,Cubic mts,0,no unit,0,no unit,0,no unit,0.90 – 0.93,TON PER SQ MTS,0.93,Square mts,Yes,No,No,Yes,No
+Liquid Bulk,Chemical ,0.77 – 1.33,Cubic mts,1.3,Cubic mts,0,no unit,0,no unit,0,no unit,0.75 – 1.30,TON PER SQ MTS,1.3,Square mts,Yes,No,No,Yes,No

@@ -1,63 +1,133 @@
-function redirect(page) {
-  // If the page string contains a slash, treat as folder/index
-  if (page.includes('/')) {
-    window.location.href = page + '.html';
-  } else {
-    window.location.href = page + '/index.html';
+const express = require("express");
+const bodyParser = require("body-parser");
+const path = require("path");
+const bcrypt = require("bcrypt");
+const db = require("./db");
+
+const app = express();
+const PORT = 3000;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
+// Serve db folder so client-side scripts can fetch CSV files under /db
+app.use('/db', express.static(path.join(__dirname, 'db')));
+
+// API endpoints to read tables from MySQL (fallback to CSV removed on server-side)
+const allowedTables = new Set([
+  'VM_berth_master',
+  'VM_berth_hire',
+  'VM_port_dues',
+  'VM_Pilotage_Master_with_Category',
+  'CM_CargoMaster',
+  'VM_currency_lookup'
+]);
+
+
+// Dedicated endpoint for CM_CargoMaster from MySQL
+app.get('/api/mysql/cargomaster', (req, res) => {
+  db.query('SELECT * FROM cm_cargomaster', (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
+
+// Endpoint to get cargo descriptions for dropdown
+app.get('/api/mysql/cargo-descriptions', (req, res) => {
+  db.query('SELECT DISTINCT CargoDescription, CargoCategoryName FROM cm_cargomaster WHERE CargoDescription IS NOT NULL ORDER BY CargoDescription', (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
+
+// Endpoint to get cargo details by description
+app.get('/api/mysql/cargo-details/:description', (req, res) => {
+  const desc = req.params.description;
+  db.query('SELECT * FROM cm_cargomaster WHERE CargoDescription = ? LIMIT 1', [desc], (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results.length > 0 ? results[0] : null);
+  });
+});
+
+// Endpoint to get wharfage rates by SoRNoCode
+app.get('/api/mysql/wharfage', (req, res) => {
+  const sorCode = req.query.sor;
+  if (!sorCode) {
+    return res.status(400).json({ error: 'missing sor query parameter' });
   }
-}
+  db.query('SELECT * FROM cm_wharfage_master WHERE sor_item = ? LIMIT 1', [sorCode], (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results.length > 0 ? results[0] : null);
+  });
+});
+// dem charges endpoint
+app.get('/api/mysql/demurrage', (req, res) => {
+  db.query('SELECT * FROM cm_dem_charges', (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
 
-function expandSignup() {
-  document.getElementById("signupCollapsed").style.display = "none";
-  document.getElementById("signupForm").style.display = "block";
-}
+app.get('/api/:table', (req, res) => {
+  const table = req.params.table;
+  if (!allowedTables.has(table)) return res.status(404).json({ error: 'table not allowed' });
+  // Simple select all — the client expects all rows (same columns as CSV)
+  db.query(`SELECT * FROM ??`, [table], (err, results) => {
+    if (err) {
+      console.error('DB error', err);
+      return res.status(500).json({ error: 'db error' });
+    }
+    res.json(results);
+  });
+});
 
-function signup() {
-  const data = {
-    firstName: document.getElementById("firstName").value,
-    lastName: document.getElementById("lastName").value,
-    mobile: document.getElementById("mobile").value,
-    email: document.getElementById("email").value,
-    company: document.getElementById("company").value,
-    password: document.getElementById("password").value,
-    confirm: document.getElementById("confirm").value,
-  };
+app.post("/signup", async (req, res) => {
+  const { firstName, lastName, mobile, email, company, password } = req.body;
+  const hashed = await bcrypt.hash(password, 10);
+  const sql = `INSERT INTO users (first_name, last_name, mobile, email, company, password) VALUES (?, ?, ?, ?, ?, ?)`;
 
-  if (data.password !== data.confirm) {
-    alert("Passwords do not match.");
-    return;
-  }
+  db.query(sql, [firstName, lastName, mobile, email, company, hashed], (err) => {
+    if (err) return res.status(500).json({ success: false, message: "Signup failed!" });
+    res.json({ success: true });
+  });
+});
 
-  fetch("/signup", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
-  }).then(res => res.json()).then(res => {
-    if (res.success) {
-      alert("Signup successful. Please log in.");
-      document.querySelectorAll(".signup-box input").forEach(el => el.value = "");
+app.post("/login", (req, res) => {
+  const { mobile, password } = req.body;
+  db.query("SELECT * FROM users WHERE mobile = ?", [mobile], async (err, results) => {
+    if (err || results.length === 0) return res.json({ success: false, message: "User not found" });
+    const user = results[0];
+    const match = await bcrypt.compare(password, user.password);
+    if (match) {
+      res.json({ success: true });
     } else {
-      alert("Signup failed.");
+      res.json({ success: false, message: "Incorrect password" });
     }
   });
-}
+});
+// Logout Route
+app.get('/logout', (req, res) => {
+  // If you're using session, you can destroy it here:
+  // req.session.destroy();
 
-function login() {
-  const mobile = document.getElementById("loginMobile").value;
-  const password = document.getElementById("loginPassword").value;
+  res.redirect('/'); // Redirects back to index.html
+});
 
-  fetch("/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ mobile, password }),
-  }).then(res => res.json()).then(res => {
-    if (res.success) {
-      sessionStorage.setItem("user", mobile);
-      window.location.href = "dashboard.html";
-    } else {
-      alert(res.message);
-    }
-  });
-}
-
-
+app.listen(PORT, () => {
+  console.log(`Server running at http://localhost:${PORT}`);
+});
