@@ -1,13 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Storage Simulator</title>
-  <link rel="stylesheet" href="../style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Module - Seaport Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        html, body { height: 100%; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(to bottom, #87CEEB, #ADD8E6); height: 100%; overflow-y: auto; font-size: 13px; }
+        .header { background-color: #87CEEB; padding: 0.5rem 1rem; text-align: center; border-bottom: 1px solid #B0E0E6; }
+        .header h1 { font-size: 1.2rem; margin-bottom: 0.5rem; }
+        nav { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        nav a { color: #1a1a1a; text-decoration: none; padding: 0.25rem 0.75rem; border-radius: 0.3rem; font-size: 0.9rem; }
+        nav a:hover { background-color: rgba(255,255,255,0.3); }
+        nav a.active { background-color: rgba(255,255,255,0.5); font-weight: 600; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 1rem; }
+        .main-grid { display: grid; grid-template-columns: 1fr 420px; gap: 1rem; align-items: start; }
+        .form-card { background: white; border-radius: 0.8rem; padding: 1.5rem; box-shadow: 0 6px 16px rgba(0,0,0,0.1); }
+        .right-panel { background: white; border-radius: 0.8rem; padding: 1.5rem; box-shadow: 0 6px 16px rgba(0,0,0,0.1); height: fit-content; max-height: calc(100vh - 120px); overflow-y: auto; }
+        .input-section { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e5e7eb; }
+        .input-section:last-of-type { border-bottom: none; }
+        .input-section h2 { font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.75rem; }
+        .radio-group { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+        .radio-group label { display: flex; align-items: center; cursor: pointer; font-size: 0.9rem; }
+        .radio-group input[type="radio"] { margin-right: 0.4rem; }
+        .form-group { margin-bottom: 0.75rem; }
+        .form-group label { display: block; font-size: 0.85rem; font-weight: 500; color: #555; margin-bottom: 0.3rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 0.4rem; font-size: 0.9rem; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: #2563eb; }
+        .container-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; }
+        .calculate-btn { width: 100%; padding: 0.75rem; font-size: 1rem; font-weight: 600; background-color: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer; margin-top: 1rem; }
+        .calculate-btn:hover { background-color: #1d4ed8; }
+        .results-section h2 { font-size: 1.1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 1rem; }
+        .result-card { background: #f9fafb; border-radius: 0.6rem; padding: 1rem; margin-bottom: 1rem; }
+        .result-card h3 { font-size: 0.95rem; font-weight: 600; color: #374151; margin-bottom: 0.75rem; }
+        .result-grid { display: grid; grid-template-columns: 1fr; gap: 0.6rem; }
+        .result-item { display: flex; justify-content: space-between; padding: 0.5rem; background: white; border-radius: 0.4rem; }
+        .result-item.total { background: #dbeafe; font-weight: 600; }
+        .result-item .label { color: #6b7280; font-size: 0.8rem; }
+        .result-item .value { color: #1a1a1a; font-weight: 600; font-size: 0.85rem; }
+        .chart-container { position: relative; height: 250px; margin-top: 1rem; }
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr; }
+            .right-panel { max-height: none; }
+        }
+        @media (max-width: 768px) {
+            .container-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
 </head>
 <body>
-  <h1>Storage Simulator</h1>
-  <p>This is the Storage Simulator page.</p>
-  <a href="../dashboard.html">Back to Dashboard</a>
+    <div class="header">
+        <h1>Storage Module</h1>
+        <nav>
+            <a href="../index.html">Home</a>
+            <a href="../vessel/index.html">Vessel</a>
+            <a href="../cargo/index.html">Cargo</a>
+            <a href="../stevedore/index.html">Stevedore</a>
+            <a href="index.html" class="active">Storage</a>
+        </nav>
+    </div>
+    <div class="backButton">
+    <button class="btn btn-primary" onclick="window.location.href='../index.html'">← Back to Main Menu</button>
+      </div>
+      
+    <div class="container">
+        <div class="main-grid">
+            <div class="form-card">
+                <!-- Storage Type Selection -->
+                <section class="input-section">
+                    <h2>Storage Type</h2>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="storageType" value="immediate" checked>
+                            <span>Immediate Cargo (15-180 days)</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="storageType" value="lease">
+                            <span>Lease/License</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Cargo Type Selection -->
+                <section class="input-section">
+                    <h2>Cargo Type</h2>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="cargoType" value="cargo" checked>
+                        <span>Cargo</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="cargoType" value="container">
+                        <span>Container</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Cargo Input Fields -->
+            <section class="input-section" id="cargoInputs">
+                <h2>Cargo Details</h2>
+                <div class="form-group">
+                    <label for="cargoDescription">Cargo Description:</label>
+                    <select id="cargoDescription">
+                        <option value="">Select Cargo...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cargoWeight">Weight (tons):</label>
+                    <input type="number" id="cargoWeight" min="0" step="0.01" value="10000">
+                </div>
+            </section>
+
+            <!-- Container Input Fields -->
+            <section class="input-section" id="containerInputs" style="display: none;">
+                <h2>Container Details</h2>
+                <div class="container-grid">
+                    <div class="form-group">
+                        <label for="container20Empty">20' Empty:</label>
+                        <input type="number" id="container20Empty" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container20Laden">20' Laden:</label>
+                        <input type="number" id="container20Laden" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container2040Empty">20-40' Empty:</label>
+                        <input type="number" id="container2040Empty" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container2040Laden">20-40' Laden:</label>
+                        <input type="number" id="container2040Laden" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container40PlusEmpty">40'+ Empty:</label>
+                        <input type="number" id="container40PlusEmpty" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container40PlusLaden">40'+ Laden:</label>
+                        <input type="number" id="container40PlusLaden" min="0" value="20">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Storage Duration -->
+            <section class="input-section" id="durationSection">
+                <h2>Storage Duration</h2>
+                <div class="form-group">
+                    <label for="storageDays">Days:</label>
+                    <input type="number" id="storageDays" min="0" value="45">
+                </div>
+            </section>
+
+            <!-- Lease Duration -->
+            <section class="input-section" id="leaseSection" style="display: none;">
+                <h2>Lease Duration</h2>
+                <div class="form-group">
+                    <label for="leaseMonths">Months:</label>
+                    <input type="number" id="leaseMonths" min="1" value="12">
+                </div>
+                <div class="form-group">
+                    <label for="leaseArea">Required Area (sq.m):</label>
+                    <input type="number" id="leaseArea" min="0" step="0.01" value="0" readonly>
+                </div>
+            </section>
+
+            <!-- Storage Area Type Selection (for immediate cargo) -->
+            <section class="input-section" id="areaTypeSection">
+                <h2>Storage Area Type</h2>
+                <div class="form-group">
+                    <label for="storageAreaType">Select Area Type:</label>
+                    <select id="storageAreaType">
+                        <option value="Open Space Unpaved">Open Space Unpaved</option>
+                        <option value="Open Space Paved">Open Space Paved</option>
+                        <option value="Covered Space">Covered Space</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Lease Type Selection -->
+            <section class="input-section" id="leaseTypeSection" style="display: none;">
+                <h2>Lease Type</h2>
+                <div class="form-group">
+                    <label for="leaseType">Select Lease Type:</label>
+                    <select id="leaseType">
+                        <option value="">Select Lease Type...</option>
+                    </select>
+                </div>
+            </section>
+
+            <button id="calculateBtn_logi" class="calculate-btn">Calculate Land Logistics</button>
+            <button id="calculateBtn_cost" class="calculate-btn">Calculate Land Cost</button>
+        </div>
+
+        <!-- Results Section -->
+        <div class="right-panel">
+            <section class="results-section" id="results" style="display: none;">
+                <h2>Storage Results</h2>
+                <!-- Logistics Results -->
+                <div class="result-card" id="logisticsResults" style="display: none;">
+                    <h3>Logistics</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="label">Required Area:</span>
+                            <span class="value" id="requiredArea">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Storage Type:</span>
+                            <span class="value" id="suggestedStorage">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Stowage Factor:</span>
+                            <span class="value" id="stowageFactor">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Density:</span>
+                            <span class="value" id="density">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Results -->
+                <div class="result-card" id="costResults" style:="display: none;">
+                    <h3>Cost Summary</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="label">Storage Charges:</span>
+                            <span class="value" id="storageCharges">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Duration:</span>
+                            <span class="value" id="storageDuration">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Rate Applied:</span>
+                            <span class="value" id="rateApplied">-</span>
+                        </div>
+                        <div class="result-item total">
+                            <span class="label">Total Cost:</span>
+                            <span class="value" id="totalCost">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart -->
+                <div class="chart-container">
+                    <canvas id="storageChart"></canvas>
+                </div>
+            </section>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script type="module" src="storage.js"></script>
 </body>
 </html>

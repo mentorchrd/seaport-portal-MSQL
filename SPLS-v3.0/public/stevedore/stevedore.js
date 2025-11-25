@@ -609,7 +609,4 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       logisticsPanel.classList.add('hidden');
     });
   }
-
-  console.log('%c✓ Stevedore Module Loaded', 'color: green; font-weight: bold');
-  console.log('%cRun debugStevedore() to test calculations', 'color: blue; font-style: italic');
 });
