@@ -5,42 +5,7 @@
    - Berth allocation and logistics
 */
 
-async function fetchText(url){
-  const tryFetch = async (u)=>{
-    try{
-      const r = await fetch(u);
-      if(!r.ok) throw new Error('fetch failed '+u+' status='+r.status);
-      return await r.text();
-    }catch(e){
-      throw e;
-    }
-  };
-  const original = url;
-  const suffix = url.replace(/^\/+/,'');
-  const candidates = [original, './'+suffix, '../'+suffix, '../../'+suffix, suffix, window.location.origin + '/' + suffix];
-  let lastErr = null;
-  for(const c of candidates){
-    try{
-      const txt = await tryFetch(c);
-      if(c !== original) console.debug('fetchText: resolved', original, 'via', c);
-      return txt;
-    }catch(err){
-      lastErr = err;
-    }
-  }
-  throw new Error('All fetch attempts failed for ' + url + ' last error: ' + (lastErr && lastErr.message));
-}
-
-function parseCSV(text){
-  const lines = text.split(/\r?\n/).filter(l=>l.trim()!=='');
-  const hdr = lines[0].split(',').map(h=>h.trim());
-  return lines.slice(1).map(l=>{
-    const cols = l.split(',');
-    const obj = {};
-    hdr.forEach((h,i)=> obj[h]=cols[i] ? cols[i].trim() : '');
-    return obj;
-  });
-}
+import { fetchText, parseCSV, fetchCargoDescriptions, fetchCargoDetails, fetchWharfageRates, formatINR, findEligibleBerths, estimateHandlingTime } from '../utils.js';
 
 document.addEventListener('DOMContentLoaded', async ()=>{
   const calculateCostBtn = document.getElementById('calculateCostBtn');
@@ -402,102 +367,6 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     return totalDemurrage;
   }
 
-  function findEligibleBerths({loa, draft, beam, cargo}) {
-    const isYes = v => {
-      if(v==null) return false;
-      const s = String(v).trim().toLowerCase();
-      return s === 'yes' || s === 'y' || s === 'true' || s === '1';
-    };
-
-    const candidates = berthMaster.filter(b=>{
-      const quay = parseFloat(b.Quay_Len) || 0;
-      const berthDraft = parseFloat(b.Draft) || 0;
-      const berthBeam = parseFloat(b.Beam) || 999;
-      
-      let cargoOk = false;
-      if(cargo){
-        const low = cargo.toLowerCase();
-        if(low.includes('container')){
-          cargoOk = isYes(b.Container);
-        }
-        else if(low.includes('liquid') && low.includes('bulk')){
-          cargoOk = isYes(b.Liquid_Bulk);
-        }
-        else if(low.includes('liquid') || low.includes('tank') || low.includes('tanker') || low.includes('oil')){
-          cargoOk = isYes(b.Liquid_Bulk);
-        }
-        else if(low.includes('bulk') || low.includes('ore') || low.includes('iron') || low.includes('coal') || low.includes('grain')){
-          cargoOk = isYes(b.Bulk);
-        }
-        else if(low.includes('roro') || low.includes('ro-ro')){
-          cargoOk = isYes(b.RORO);
-        }
-        else if(low.includes('pol')){
-          cargoOk = isYes(b.POL);
-        }
-        else if(low.includes('passenger') || low.includes('cruise')){
-          cargoOk = isYes(b.PassnCruise);
-        }
-        else if(low.includes('bunker')){
-          cargoOk = isYes(b.Bunker);
-        }
-        else {
-          const hasSpecializedType = isYes(b.Container) || isYes(b.Liquid_Bulk) || isYes(b.RORO) || 
-                                     isYes(b.POL) || isYes(b.PassnCruise) || isYes(b.Bunker);
-          cargoOk = !hasSpecializedType && isYes(b.Bulk);
-        }
-      } else {
-        cargoOk = isYes(b.Bulk);
-      }
-      
-      return quay >= loa && berthDraft >= draft && beam <= berthBeam && cargoOk;
-    });
-
-    const dockGroups = {};
-    candidates.forEach(b => {
-      const dock = b.Dock_Name || 'Unknown Dock';
-      if(!dockGroups[dock]) dockGroups[dock] = [];
-      dockGroups[dock].push(b.BerthName);
-    });
-
-    const formatted = Object.keys(dockGroups).map(dock => {
-      const berths = dockGroups[dock].slice(0, 5).map(b => ` • ${b}`).join('<br>');
-      return `<b>${dock}</b><br>${berths}`;
-    });
-
-    return formatted;
-  }
-
-  function estimateHandlingTime(cargo, quantity) {
-    let rateMtPerDay = 1000; // default
-    
-    if (selectedCargoData) {
-      const rate = Number(selectedCargoData.DSCHRG_RATE_PR_DAY) || Number(selectedCargoData.LD_RATE_PR_DAY);
-      if (rate && rate > 0) rateMtPerDay = rate;
-    } else if (cargo) {
-      const name = cargo.toLowerCase();
-      if(name.includes('grain') || name.includes('food')) rateMtPerDay = 800;
-      if(name.includes('iron') || name.includes('ore')) rateMtPerDay = 2500;
-      if(name.includes('cement') || name.includes('clinker')) rateMtPerDay = 1200;
-      // quantity is 10 containers/hr which means rate is 240 containers/day
-      if(name.includes('container')) {
-        console.debug('Setting rateMtPerDay for container to 240');
-        console.debug('hours  '+ quantity+' containers is '+ Math.round(Math.max((quantity || 0) / rateMtPerDay, 0.1)*24));
-        rateMtPerDay = 240;
-      }
-      if(name.includes('liquid') || name.includes('oil') || name.includes('diesel') || name.includes('tank')) rateMtPerDay = 5000;
-    }
-
-    const days = Math.max((quantity || 0) / rateMtPerDay, 0.1);
-    return Math.round(days * 24);
-  }
-
-  function formatINR(x){
-    if(x==null || isNaN(Number(x))) return '₹0';
-    const num = Number(x);
-    return '₹' + num.toLocaleString('en-IN', {maximumFractionDigits:0});
-  }
-
   let costChart = null;
   function renderChart(wharfage, demurrage, taxes){
     const ctx = document.getElementById('costChart');
@@ -610,8 +479,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   function computeLogistics() {
     const inp = readInputs();
-    const berths = findEligibleBerths({loa: inp.loa, draft: inp.draft, beam: inp.beam, cargo: inp.cargo});
-    const handlingTime = estimateHandlingTime(inp.cargo, inp.weight);
+    const berths = findEligibleBerths({loa: inp.loa, draft: inp.draft, beam: inp.beam, cargo: inp.cargo}, berthMaster);
+    const handlingTime = estimateHandlingTime(inp.cargo, inp.weight, selectedCargoData);
 
     if(handlingHoursEl) handlingHoursEl.textContent = String(handlingTime);
     if(berthsList) {
