@@ -563,6 +563,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if(calculateCostBtn){
     calculateCostBtn.addEventListener('click', ()=>{
       const res = computeAndRender();
+      const resultsContainer = document.getElementById('resultsContainer');
+      if(resultsContainer) resultsContainer.hidden = false;
       if(costPanel){ costPanel.classList.add('active'); costPanel.setAttribute('aria-hidden','false'); }
       if(logisticsPanel){ logisticsPanel.classList.remove('active'); logisticsPanel.setAttribute('aria-hidden','true'); }
     });
@@ -570,6 +572,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if(calculateLogisticsBtn){
     calculateLogisticsBtn.addEventListener('click', ()=>{
       const res = computeAndRender();
+      const resultsContainer = document.getElementById('resultsContainer');
+      if(resultsContainer) resultsContainer.hidden = false;
       if(logisticsPanel){ logisticsPanel.classList.add('active'); logisticsPanel.setAttribute('aria-hidden','false'); }
       if(costPanel){ costPanel.classList.remove('active'); costPanel.setAttribute('aria-hidden','true'); }
     });
@@ -578,5 +582,38 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   // initial hide
   if(costPanel) costPanel.classList.remove('active');
   if(logisticsPanel) logisticsPanel.classList.remove('active');
+
+  // Clear button handler
+  const clearBtn = document.getElementById('clearBtn');
+  if(clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      // Reset all form inputs to defaults
+      const vesselNameInput = document.getElementById('vesselName');
+      const vesselTypeSelect = document.getElementById('vesselType');
+      const gtInput = document.getElementById('gt');
+      const loaInput = document.getElementById('loa');
+      const draftInput = document.getElementById('draft');
+      const beamInput = document.getElementById('beam');
+      const cargoNameSelect = document.getElementById('cargoName');
+      const cargoGroupInput = document.getElementById('cargoGroup');
+      const weightInput = document.getElementById('weight');
+      
+      if(vesselNameInput) vesselNameInput.value = '';
+      if(vesselTypeSelect) vesselTypeSelect.selectedIndex = 0;
+      if(gtInput) gtInput.value = '5000';
+      if(loaInput) loaInput.value = '180';
+      if(draftInput) draftInput.value = '9.5';
+      if(beamInput) beamInput.value = '30';
+      if(cargoNameSelect) cargoNameSelect.selectedIndex = 0;
+      if(cargoGroupInput) cargoGroupInput.value = '';
+      if(weightInput) weightInput.value = '40000';
+      
+      // Hide results
+      const resultsContainer = document.getElementById('resultsContainer');
+      if(resultsContainer) resultsContainer.hidden = true;
+      if(costPanel) costPanel.classList.remove('active');
+      if(logisticsPanel) logisticsPanel.classList.remove('active');
+    });
+  }
 
 });

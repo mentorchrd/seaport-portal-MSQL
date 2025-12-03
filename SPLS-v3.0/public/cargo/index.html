@@ -5,50 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seaport Cargo Charges Simulator</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../shared.css">
   <style>
-    html, body { height: 100%; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(to bottom, #87CEEB, #ADD8E6); height: 100%; overflow: hidden; font-size: 13px; }
-    .header { background-color: #87CEEB; padding: 0.5rem 0.5rem; text-align: center; border-bottom: 1px solid #B0E0E6; }
-    .header h1 { font-size: 1rem; }
-    .container { max-width: 1100px; height: calc(100vh - 48px); margin: 0 auto; padding: 0.4rem; }
-    .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 0.5rem; height: 100%; align-items: start; }
-    .form-card { background: white; border-radius: 0.6rem; padding: 0.6rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); height: 100%; overflow: hidden; display: flex; flex-direction: column; }
-    .form-card h2 { font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
-    .form-section { margin-bottom: 0.4rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; align-items: center; }
-    .form-section h3 { grid-column: 1 / -1; margin: 0 0 0.25rem 0; font-size: 0.95rem; }
-    .form-group { margin: 0; }
-    .form-group label { display: block; font-size: 0.75rem; font-weight: 500; color: #555; margin-bottom: 0.18rem; }
-    .form-group input, .form-group select { width: 100%; padding: 0.22rem 0.5rem; border: 1px solid #ddd; border-radius: 0.36rem; font-size: 0.85rem; }
-    .button-group { display: grid; grid-template-columns: 1fr; gap: 0.35rem; margin-top: 0.5rem; grid-column: 1 / -1; }
-    .btn { padding: 0.5rem 0.75rem; font-size: 0.9rem; font-weight: 600; border-radius: 0.4rem; cursor: pointer; border: none; }
-    .btn-primary { background-color: #2563eb; color: white; }
-    .right-col { position: relative; height: 100%; }
-    .panel { background: white; border-radius: 0.6rem; padding: 0.75rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); height: 100%; overflow-y: auto; }
-    .cost-value { font-size: 1.25rem; font-weight: 700; color: #2563eb; margin: 0.4rem 0; }
-    .breakdown-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
-    .chart-container { position: relative; height: 200px; margin: 0.5rem 0; }
-    .section-title { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; margin: 0.5rem 0 0.35rem 0; }
-    .mode-selector { display: flex; gap: 1rem; margin-bottom: 0.5rem; grid-column: 1 / -1; }
-    .mode-selector label { display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem; cursor: pointer; }
-    .mode-selector input[type="radio"] { cursor: pointer; }
-    .hidden { display: none !important; }
-    .logistics-panel { background: white; border-radius: 0.6rem; padding: 0.75rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); margin-top: 0.5rem; }
-    .logistics-item { margin: 0.5rem 0; }
-    .logistics-item-label { font-size: 0.85rem; color: #555; margin-bottom: 0.2rem; }
-    .logistics-item-value { font-size: 1rem; font-weight: 600; color: #1a1a1a; }
+    /* Override for cargo module - make mode selector radio buttons horizontal and properly spaced */
+    .mode-selector {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .mode-selector label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .mode-selector input[type="radio"] {
+      margin-right: 0.5rem;
+    }
+    
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Seaport Cargo Module</h1>
-    <nav style="display: flex; gap: 1rem; justify-content: center; margin: 0.5rem 0;">
-      <a href="../dashboard.html" style="color: #333; text-decoration: none; padding: 0.25rem 0.5rem;">Home</a>
-      <a href="../vessel/index.html" style="color: #333; text-decoration: none; padding: 0.25rem 0.5rem;">Vessel</a>
-      <a href="index.html" style="color: #333; text-decoration: none; padding: 0.25rem 0.5rem; background: rgba(255,255,255,0.5); border-radius: 0.3rem;">Cargo</a>
-      <a href="../stevedore/index.html" style="color: #333; text-decoration: none; padding: 0.25rem 0.5rem;">Stevedore</a>
-      <a href="../storage/index.html" style="color: #333; text-decoration: none; padding: 0.25rem 0.5rem;">Storage</a>
-      <a href="../rail/index.html" style="color: #333; text-decoration: none; padding: 0.25rem 0.5rem;">Railway</a>
+    <h1>Cargo Module</h1>
+    <nav>
+      <a href="../dashboard.html">Home</a>
+      <a href="../vessel/index.html">Vessel</a>
+      <a href="../cargo/index.html" class="active">Cargo</a>
+      <a href="../stevedore/index.html">Stevedore</a>
+      <a href="../storage/index.html">Storage</a>
+      <a href="../rail/index.html">Railway</a>
     </nav>
   </div>
   <div class="container">
@@ -245,11 +235,12 @@
         <div class="button-group">
           <button class="btn btn-primary" id="calculateCostBtn">Calculate Cargo Charges</button>
           <button class="btn btn-primary" id="calculateLogisticsBtn">Calculate Logistics</button>
+          <button class="btn btn-clear" id="clearBtn">Clear Form</button>
         </div>
       </div>
 
-      <div class="right-col">
-        <div id="costPanel" class="panel">
+      <div class="right-col" hidden id="resultsContainer">
+        <div id="costPanel" class="panel hidden">
           <div class="section-title">Total Cargo Charges</div>
           <div id="totalCostValue" class="cost-value">₹0</div>
 
@@ -274,6 +265,7 @@
           <div class="chart-container">
             <canvas id="costChart"></canvas>
           </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
         </div>
 
         <div id="logisticsPanel" class="panel hidden">
@@ -286,8 +278,9 @@
 
           <div class="logistics-item">
             <div class="logistics-item-label">Eligible Berths</div>
-            <div id="berthsList" class="logistics-item-value">--</div>
+            <div id="berthsList" class="logistics-item-value">-</div>
           </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
         </div>
       </div>
     </div>

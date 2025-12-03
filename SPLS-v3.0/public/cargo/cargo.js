@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   const calculateCostBtn = document.getElementById('calculateCostBtn');
   const calculateLogisticsBtn = document.getElementById('calculateLogisticsBtn');
   const costPanel = document.getElementById('costPanel');
+  const resultsContainer = document.getElementById('resultsContainer');
   const logisticsPanel = document.getElementById('logisticsPanel');
   const totalCostValue = document.getElementById('totalCostValue');
   const wharfageValEl = document.getElementById('wharfageVal');
@@ -501,16 +502,45 @@ document.addEventListener('DOMContentLoaded', async ()=>{
         costPanel.classList.remove('hidden');
         logisticsPanel.classList.add('hidden');
       }
+      if (resultsContainer) {
+        resultsContainer.hidden = false;
+      }
     });
   }
 
   if(calculateLogisticsBtn){
     calculateLogisticsBtn.addEventListener('click', ()=>{
       computeLogistics();
+      if (resultsContainer) {
+        resultsContainer.hidden = false;
+      }
       if(logisticsPanel) {
         logisticsPanel.classList.remove('hidden');
         costPanel.classList.add('hidden');
       }
+    });
+  }
+
+  // Clear button handler
+  const clearBtn = document.getElementById('clearBtn');
+  if(clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      // Reset all form fields
+      document.querySelectorAll('input[type="number"]').forEach(input => {
+        if(input.id === 'weight') input.value = '40000';
+        else if(input.id === 'loa') input.value = '200';
+        else if(input.id === 'draft') input.value = '10';
+        else if(input.id === 'beam') input.value = '30';
+        else if(input.id === 'daysAfterFree') input.value = '0';
+        else if(input.id === 'quantityDelivered') input.value = '40000';
+        else input.value = '0';
+      });
+      document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+      
+      // Hide results
+      if (resultsContainer) resultsContainer.hidden = true;
+      if(costPanel) costPanel.classList.add('hidden');
+      if(logisticsPanel) logisticsPanel.classList.add('hidden');
     });
   }
 });

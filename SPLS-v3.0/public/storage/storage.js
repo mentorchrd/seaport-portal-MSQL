@@ -123,6 +123,33 @@ function setupEventListeners() {
     // Calculate button
     document.getElementById('calculateBtn_cost').addEventListener('click', () => calculateStorage('cost'));
     document.getElementById('calculateBtn_logi').addEventListener('click', () => calculateStorage('logistics'));
+    
+    // Clear button
+    const clearBtn = document.getElementById('clearBtn');
+    if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+            // Reset radio buttons to defaults
+            document.querySelector('input[name="storageType"][value="immediate"]').checked = true;
+            document.querySelector('input[name="cargoType"][value="cargo"]').checked = true;
+            
+            // Reset all number inputs
+            document.querySelectorAll('input[type="number"]').forEach(input => {
+                if(input.id === 'cargoWeight') input.value = '10000';
+                else input.value = '0';
+            });
+            
+            // Reset selects
+            document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+            
+            // Hide results
+            const resultsContainer = document.getElementById('resultsContainer');
+            if(resultsContainer) resultsContainer.hidden = true;
+            
+            // Trigger storage type change to show/hide appropriate sections
+            handleStorageTypeChange({target: {value: 'immediate'}});
+            handleCargoTypeChange({target: {value: 'cargo'}});
+        });
+    }
 }
 
 // Handle storage type change
@@ -357,10 +384,12 @@ function calculateLeaseStorage(area, cargoType) {
 // Display results
 function displayResults(results) {
     const resultsSection = document.getElementById('results');
+    const resultsContainer = document.getElementById('resultsContainer');   
     const logisticsCard = document.getElementById('logisticsResults');
     const costCard = document.getElementById('costResults');
     
     resultsSection.style.display = 'block';
+    resultsContainer.hidden = false;
 
     // Show/hide sections based on calculation type
     if (results.calculationType === 'logistics') {

@@ -5,50 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Seaport Stevedore Module</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    html, body { height: 100%; }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: linear-gradient(to bottom, #87CEEB, #ADD8E6); height: 100%; overflow: hidden; font-size: 13px; }
-    .header { background-color: #87CEEB; padding: 0.5rem 0.5rem; text-align: center; border-bottom: 1px solid #B0E0E6; }
-    .header h1 { font-size: 1rem; }
-    .container { max-width: 1100px; height: calc(100vh - 48px); margin: 0 auto; padding: 0.4rem; }
-    .main-grid { display: grid; grid-template-columns: 1fr 360px; gap: 0.5rem; height: 100%; align-items: start; }
-    .form-card { background: white; border-radius: 0.6rem; padding: 0.6rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); height: 100%; overflow-y: auto; display: flex; flex-direction: column; }
-    .form-card h2 { font-size: 1rem; font-weight: 600; color: #1a1a1a; margin-bottom: 0.5rem; }
-    .form-section { margin-bottom: 0.4rem; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.4rem; align-items: center; }
-    .form-section h3 { grid-column: 1 / -1; margin: 0 0 0.25rem 0; font-size: 0.95rem; }
-    .form-group { margin: 0; }
-    .form-group label { display: block; font-size: 0.75rem; font-weight: 500; color: #555; margin-bottom: 0.18rem; }
-    .form-group input, .form-group select { width: 100%; padding: 0.22rem 0.5rem; border: 1px solid #ddd; border-radius: 0.36rem; font-size: 0.85rem; }
-    .form-group.full-width { grid-column: 1 / -1; }
-    .button-group { display: grid; grid-template-columns: 1fr; gap: 0.35rem; margin-top: 0.5rem; grid-column: 1 / -1; }
-    .btn { padding: 0.5rem 0.75rem; font-size: 0.9rem; font-weight: 600; border-radius: 0.4rem; cursor: pointer; border: none; }
-    .btn-primary { background-color: #2563eb; color: white; }
-    .right-col { position: relative; height: 100%; display: flex; flex-direction: column; gap: 0.5rem; }
-    .panel { background: white; border-radius: 0.6rem; padding: 0.75rem; box-shadow: 0 6px 16px rgba(0,0,0,0.06); overflow-y: auto; }
-    .cost-value { font-size: 1.25rem; font-weight: 700; color: #2563eb; margin: 0.4rem 0; }
-    .breakdown-item { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.85rem; }
-    .section-title { font-size: 0.95rem; font-weight: 600; color: #1a1a1a; margin: 0.5rem 0 0.35rem 0; }
-    .hidden { display: none !important; }
-    .logistics-item { margin: 0.5rem 0; }
-    .logistics-item-label { font-size: 0.85rem; color: #555; margin-bottom: 0.2rem; }
-    .logistics-item-value { font-size: 1rem; font-weight: 600; color: #1a1a1a; }
-    .chart-container { position: relative; height: 180px; margin: 0.5rem 0; }
-  </style>
+  <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
   <div class="header">
-    <div class="header">
-        <h1>Stevedore Module</h1>
-        <nav>
-            <a href="../dashboard.html">Home</a>
-            <a href="../vessel/index.html">Vessel</a>
-            <a href="../cargo/index.html">Cargo</a>
-            <a href="index.html" class="active">Stevedore</a>
-            <a href="../storage/index.html">Storage</a>
-            <a href="../rail/index.html">Railway</a>
-        </nav>
-    </div>
+    <h1>Stevedore Module</h1>
+    <nav>
+      <a href="../dashboard.html">Home</a>
+      <a href="../vessel/index.html">Vessel</a>
+      <a href="../cargo/index.html">Cargo</a>
+      <a href="../stevedore/index.html" class="active">Stevedore</a>
+      <a href="../storage/index.html">Storage</a>
+      <a href="../rail/index.html">Railway</a>
+    </nav>
   </div>
   <div class="container">
     <div class="main-grid">
@@ -110,10 +79,11 @@
         <div class="button-group">
           <button class="btn btn-primary" id="calculateLogisticsBtn">Calculate Logistics</button>
           <button class="btn btn-primary" id="calculateCostBtn">Calculate Costs</button>
+          <button class="btn btn-clear" id="clearBtn">Clear Form</button>
         </div>
       </div>
 
-      <div class="right-col">
+      <div class="right-col" hidden id="resultsContainer">
         <!-- Logistics Panel -->
         <div id="logisticsPanel" class="panel hidden">
           <div class="section-title">Operational Logistics</div>
@@ -132,6 +102,7 @@
             <div class="logistics-item-label">Datum per Crane (Tons)</div>
             <div id="datumValue" class="logistics-item-value">--</div>
           </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
         </div>
 
         <!-- Cost Panel -->
@@ -164,6 +135,7 @@
           <div class="chart-container">
             <canvas id="costChart"></canvas>
           </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
         </div>
       </div>
     </div>

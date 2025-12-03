@@ -582,6 +582,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       const result = calculateLogistics();
       if (!result) return;
 
+      const resultsContainer = document.getElementById('resultsContainer');
+      if (resultsContainer) resultsContainer.hidden = false;
+
       workDaysEl.textContent = `${result.workDays} days`;
       gangsRequiredEl.textContent = `${result.gangsRequired} Gangs`;
       datumValueEl.textContent = `${result.datumValue} tons`;
@@ -596,6 +599,9 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       const result = calculateCosts();
       if (!result) return;
 
+      const resultsContainer = document.getElementById('resultsContainer');
+      if (resultsContainer) resultsContainer.hidden = false;
+
       totalCostValue.textContent = formatINR(result.total);
       compositeVal.textContent = formatINR(result.composite);
       royaltyStevedoringVal.textContent = formatINR(result.royaltyStevedoring);
@@ -607,6 +613,26 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
       costPanel.classList.remove('hidden');
       logisticsPanel.classList.add('hidden');
+    });
+  }
+
+  // Clear button handler
+  const clearBtn = document.getElementById('clearBtn');
+  if(clearBtn){
+    clearBtn.addEventListener('click', ()=>{
+      // Reset all form fields
+      document.querySelectorAll('input[type="number"]').forEach(input => {
+        if(input.id === 'weight') input.value = '10000';
+        else if(input.id === 'vesselTonnage') input.value = '5000';
+        else input.value = '0';
+      });
+      document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+      
+      // Hide results
+      const resultsContainer = document.getElementById('resultsContainer');
+      if (resultsContainer) resultsContainer.hidden = true;
+      logisticsPanel.classList.add('hidden');
+      costPanel.classList.add('hidden');
     });
   }
 });

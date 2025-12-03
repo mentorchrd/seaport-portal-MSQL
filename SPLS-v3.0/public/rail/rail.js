@@ -120,6 +120,29 @@ function setupEventListeners() {
     // Calculate buttons
     document.getElementById('calculateBtn_logi').addEventListener('click', () => calculateRailway('logistics'));
     document.getElementById('calculateBtn_cost').addEventListener('click', () => calculateRailway('cost'));
+    
+    // Clear button
+    const clearBtn = document.getElementById('clearBtn');
+    if(clearBtn){
+        clearBtn.addEventListener('click', ()=>{
+            // Reset all inputs
+            document.getElementById('cargoType').selectedIndex = 0;
+            document.getElementById('wagonType').selectedIndex = 0;
+            document.getElementById('numWagons').value = '40';
+            document.getElementById('container20ft').value = '0';
+            document.getElementById('container40ft').value = '0';
+            document.getElementById('container40ftPlus').value = '0';
+            document.getElementById('cargoWeight').value = '2000';
+            document.getElementById('operationHours').value = '10';
+            
+            // Hide results
+            const resultsContainer = document.getElementById('resultsContainer');
+            if(resultsContainer) resultsContainer.hidden = true;
+            
+            // Reset cargo type display
+            handleCargoTypeChange({target: {value: ''}});
+        });
+    }
 }
 
 // Handle cargo type change
@@ -328,10 +351,12 @@ function calculateDemurrage(totalHours, freeHours, numWagons) {
 // Display results
 function displayResults(results) {
     const resultsSection = document.getElementById('results');
+    const resultsContainer = document.getElementById('resultsContainer');
     const logisticsCard = document.getElementById('logisticsResults');
     const costCard = document.getElementById('costResults');
     
     resultsSection.style.display = 'block';
+    resultsContainer.hidden = false;
 
     // Show/hide sections based on calculation type
     if (results.calculationType === 'logistics') {
