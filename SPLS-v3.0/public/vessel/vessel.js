@@ -588,6 +588,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   if(clearBtn){
     clearBtn.addEventListener('click', ()=>{
       // Reset all form inputs to defaults
+      logisticsPanel.setAttribute('aria-hidden','true');
+      costPanel.setAttribute('aria-hidden','true');
       const vesselNameInput = document.getElementById('vesselName');
       const vesselTypeSelect = document.getElementById('vesselType');
       const gtInput = document.getElementById('gt');
@@ -600,13 +602,13 @@ document.addEventListener('DOMContentLoaded', async ()=>{
       
       if(vesselNameInput) vesselNameInput.value = '';
       if(vesselTypeSelect) vesselTypeSelect.selectedIndex = 0;
-      if(gtInput) gtInput.value = '5000';
-      if(loaInput) loaInput.value = '180';
-      if(draftInput) draftInput.value = '9.5';
-      if(beamInput) beamInput.value = '30';
+      if(gtInput) gtInput.value = '0';
+      if(loaInput) loaInput.value = '0';
+      if(draftInput) draftInput.value = '0';
+      if(beamInput) beamInput.value = '0';
       if(cargoNameSelect) cargoNameSelect.selectedIndex = 0;
       if(cargoGroupInput) cargoGroupInput.value = '';
-      if(weightInput) weightInput.value = '40000';
+      if(weightInput) weightInput.value = '0';
       
       // Hide results
       const resultsContainer = document.getElementById('resultsContainer');
