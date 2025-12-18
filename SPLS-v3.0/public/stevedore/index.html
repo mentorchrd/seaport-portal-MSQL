@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seaport Stevedore Module</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+  <div class="header">
+    <h1>Stevedore Module</h1>
+    <nav>
+      <a href="../dashboard.html">Home</a>
+      <a href="../vessel/index.html">Vessel</a>
+      <a href="../cargo/index.html">Cargo</a>
+      <a href="../stevedore/index.html" class="active">Stevedore</a>
+      <a href="../storage/index.html">Storage</a>
+      <a href="../rail/index.html">Railway</a>
+    </nav>
+  </div>
+  <div class="container">
+    <div class="main-grid">
+      <div class="form-card">
+        <h2>LABOUR & STEVEDORING</h2>
+
+        <div class="form-section">
+          <h3>Cargo Details</h3>
+          <div class="form-group">
+            <label for="cargoName">Cargo Name</label>
+            <select id="cargoName">
+              <option value="">Select Cargo</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="cargoCategory">Cargo Category</label>
+            <input type="text" id="cargoCategory" disabled>
+          </div>
+          <div class="form-group">
+            <label for="weight">Weight of Cargo (Tons)</label>
+            <input type="number" id="weight" value="10000" min="0">
+          </div>
+          <div class="form-group">
+            <label for="royaltyCargoType">Royalty Cargo Type</label>
+            <select id="royaltyCargoType">
+              <option value="">Auto-detect</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <h3>Vessel & Labour Configuration</h3>
+          <div class="form-group">
+            <label for="vesselTonnage">Vessel Tonnage (GRT)</label>
+            <input type="number" id="vesselTonnage" value="5000" min="0">
+          </div>
+          <div class="form-group">
+            <label for="use100TonCrane">Use 100+ Ton Crane</label>
+            <select id="use100TonCrane">
+              <option value="N">No</option>
+              <option value="Y">Yes</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label for="labourGangLine">Labour Gang Line</label>
+            <select id="labourGangLine">
+              <option value="">Select Labour Line</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="shiftType">Shift Type</label>
+            <select id="shiftType">
+              <option value="Full">Full Shift</option>
+              <option value="Half">Half Shift</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" id="calculateLogisticsBtn">Calculate Logistics</button>
+          <button class="btn btn-primary" id="calculateCostBtn">Calculate Costs</button>
+          <button class="btn btn-clear" id="clearBtn">Clear Form</button>
+        </div>
+      </div>
+
+      <div class="right-col" hidden id="resultsContainer">
+        <!-- Logistics Panel -->
+        <div id="logisticsPanel" class="panel hidden">
+          <div class="section-title">Operational Logistics</div>
+          
+          <div class="logistics-item">
+            <div class="logistics-item-label">Time to Complete Work</div>
+            <div id="workDays" class="logistics-item-value">0 days</div>
+          </div>
+
+          <div class="logistics-item">
+            <div class="logistics-item-label">Maximum Gangs Required</div>
+            <div id="gangsRequired" class="logistics-item-value">0 Gangs</div>
+          </div>
+
+          <div class="logistics-item">
+            <div class="logistics-item-label">Datum per Crane (Tons)</div>
+            <div id="datumValue" class="logistics-item-value">--</div>
+          </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
+        </div>
+
+        <!-- Cost Panel -->
+        <div id="costPanel" class="panel hidden">
+          <div class="section-title">Total Labour & Royalty Charges</div>
+          <div id="totalCostValue" class="cost-value">₹0</div>
+
+          <div class="section-title">Charges Breakdown</div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Composite Stevedoring:</span>
+            <span id="compositeVal" class="breakdown-value">₹0</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Royalty - Stevedoring:</span>
+            <span id="royaltyStevedoringVal" class="breakdown-value">₹0</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Royalty - Shore Handling:</span>
+            <span id="royaltyShoreVal" class="breakdown-value">₹0</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Sub-Total:</span>
+            <span id="subtotalVal" class="breakdown-value">₹0</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Taxes (GST @ 18%):</span>
+            <span id="taxesVal" class="breakdown-value">₹0</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="costChart"></canvas>
+          </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="stevedore.js"></script>
+</body>
+</html>

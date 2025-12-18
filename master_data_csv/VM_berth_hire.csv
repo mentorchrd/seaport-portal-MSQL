@@ -1,0 +1,6 @@
+﻿vessel_type,coastal_rate,foreign_rate
+Tankers,0.0068,0.1785
+Container ,0.0047,0.124
+RoRo ,0.0056,0.1473
+Bulk Cargo,0.0052,0.1364
+Others,0.0063,0.1636

@@ -1,127 +1,136 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Vessel Simulator</title>
-  <link rel="stylesheet" href="../style.css">
-  <style>
-    .vessel-container {
-      display: flex;
-      min-height: 90vh;
-      align-items: flex-start;
-      gap: 40px;
-      margin: 40px auto;
-      max-width: 1000px;
-    }
-    .vessel-form-panel {
-      width: 25%;
-      background: #f8faff;
-      border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
-      padding: 30px 20px 20px 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-    .vessel-form-panel h2 {
-      margin-top: 0;
-      font-size: 20px;
-      margin-bottom: 20px;
-    }
-    .vessel-form-panel label {
-      margin-top: 10px;
-      font-weight: 500;
-    }
-    .vessel-form-panel input {
-      margin-bottom: 10px;
-      padding: 7px 10px;
-      border-radius: 5px;
-      border: 1px solid #b0c4de;
-      font-size: 15px;
-    }
-    .vessel-form-panel button {
-      margin-top: 18px;
-      padding: 8px 0;
-      border: none;
-      border-radius: 5px;
-      background: #003366;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    .back-btn {
-      background: #e0e7ef;
-      color: #003366;
-      margin-bottom: 18px;
-      font-size: 15px;
-      border: none;
-      border-radius: 5px;
-      padding: 7px 0;
-      cursor: pointer;
-    }
-    .right-panel {
-      flex: 1;
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 400px;
-    }
-    #costBtns {
-      display: none;
-      flex-direction: column;
-      gap: 20px;
-      margin-top: 40px;
-      align-items: center;
-    }
-    #costBtns button {
-      width: 220px;
-      padding: 15px 0;
-      font-size: 17px;
-      background: #00509e;
-      color: white;
-      border: none;
-      border-radius: 7px;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    #costBtns button:hover {
-      background: #003366;
-    }
-  </style>
-  <script defer src="vessel.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seaport Fare & Logistics Simulator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
-  <div class="vessel-container">
-    <div class="vessel-form-panel">
-      <button class="back-btn" id="backBtn">&larr; Back</button>
-      <h2>Vessel Simulation Details</h2>
-      <form id="vesselForm">
-        <label>Vessel Name<input type="text" name="vesselName" required></label>
-        <label>IMO Number<input type="text" name="imoNumber" required></label>
-        <label>GT<input type="number" name="gt" required></label>
-        <label>ETA<input type="datetime-local" name="eta" required></label>
-        <label>ETD<input type="datetime-local" name="etd" required></label>
-        <label>LOA<input type="number" name="loa" required></label>
-        <label>Draft<input type="number" name="draft" required></label>
-        <label>Beam<input type="number" name="beam" required></label>
-        <label>Cargo
-          <select name="cargo" id="cargoSelect" required>
-            <option value="">Select Cargo</option>
-          </select>
-        </label>
-        <label>Foreign<input type="text" name="foreign"></label>
-        <label>Postal<input type="text" name="postal"></label>
-        <label>Last Visit To<input type="text" name="lastVisit"></label>
-        <button type="submit">Submit</button>
-      </form>
+    <div class="header">
+        <h1>Vessel Module</h1>
+        <nav>
+            <a href="../dashboard.html">Home</a>
+            <a href="../vessel/index.html" class="active">Vessel</a>
+            <a href="../cargo/index.html">Cargo</a>
+            <a href="../stevedore/index.html">Stevedore</a>
+            <a href="../storage/index.html">Storage</a>
+            <a href="../rail/index.html">Railway</a>
+        </nav>
     </div>
-    <div class="right-panel" id="rightPanel">
-      <div id="costBtns">
-        <button id="logisticBtn">Logistic Calculator</button>
-        <button id="costBtn">Cost Calculator</button>
+
+    <div class="container">
+      <div class="main-grid">
+        <div class="form-card">
+          <h2>VESSEL MODULE</h2>
+
+          <div class="form-section">
+            <h3>Vessel Details</h3>
+            <div class="form-group">
+              <label for="vesselName">Vessel Name</label>
+              <input id="vesselName">
+            </div>
+            <div class="form-group">
+              <label for="vesselType">Trade Type</label>
+              <select id="vesselType">
+                <option>Foreign</option>
+                <option>Domestic</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="gt">GRT / GT</label>
+              <input type="number" id="gt" value="5000">
+            </div>
+            <div class="form-group">
+              <label for="loa">LOA (m)</label>
+              <input type="number" step="0.1" id="loa" value="180">
+            </div>
+            <div class="form-group">
+              <label for="draft">Draft (m)</label>
+              <input type="number" step="0.1" id="draft" value="9.5">
+            </div>
+            <div class="form-group">
+              <label for="beam">Beam (m)</label>
+              <input type="number" step="0.1" id="beam" value="30">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Cargo Details</h3>
+            <div class="form-group">
+              <label for="cargoName">Cargo Name</label>
+              <select id="cargoName">
+                <!-- Options will be populated dynamically by vessel.js -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cargoGroup">Cargo Category</label>
+              <input type="text" id="cargoGroup" value="Dry Bulk" disabled>
+            </div>
+            <div class="form-group">
+              <label for="weight">Weight of Cargo (Tons)</label>
+              <input type="number" id="weight" value="300">
+            </div>
+          </div>
+
+          <div class="button-group">
+            <button class="btn btn-primary" id="calculateCostBtn">Calculate Vessel Charges</button>
+            <button class="btn btn-primary" id="calculateLogisticsBtn">Calculate Logistics</button>
+            <button class="btn btn-clear" id="clearBtn">Clear Form</button>
+          </div>
+        </div>
+
+        <div class="right-col" hidden id="resultsContainer">
+          <div id="costPanel" class="panel" aria-hidden="true">
+            <div class="section-title">Total Vessel Charges</div>
+            <div id="totalCostValue" class="cost-value">₹0</div>
+
+            <div class="section-title">Charges Breakdown</div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Port Dues:</span>
+              <span id="portDuesVal" class="breakdown-value">₹0</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Pilotage:</span>
+              <span id="pilotageVal" class="breakdown-value">₹0</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Berth Hire:</span>
+              <span id="berthHireVal" class="breakdown-value">₹0</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Sub-Total:</span>
+              <span id="subtotalVal" class="breakdown-value">₹0</span>
+            </div>
+            <div class="breakdown-item">
+              <span class="breakdown-label">Taxes (GST @ 18%):</span>
+              <span id="taxesVal" class="breakdown-value">₹0</span>
+            </div>
+
+            <div class="chart-container">
+              <canvas id="costChart"></canvas>
+            </div>
+            <button class="btn btn-print" id="printCostBtn" onclick="window.print()">Print Results</button>
+          </div>
+
+          <div id="logisticsPanel" class="panel" aria-hidden="true">
+            <div class="section-title">Estimated Handling Time</div>
+            <div class="cost-value" style="font-size: 1.75rem;"><span id="handlingHours">0</span> <span style="font-size: 1rem; color: #666;">Hours</span></div>
+
+
+            <div class="section-title">Suitable Berths & Available Facility</div>
+            <div id="berthsList" class="logistics-item">
+              <div class="logistics-item-label">-</div>
+              <div class="logistics-item-value">-</div>
+            </div>
+            <button class="btn btn-print" id="printLogisticsBtn" onclick="window.print()">Print Results</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</body>
-</html>
+
+    <!-- load local logic that performs CSV lookups and calculations -->
+    <script defer src="vessel.js"></script>
+  </body>
+  </html>

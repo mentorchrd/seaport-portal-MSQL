@@ -1,0 +1,30 @@
+﻿Lines,RailwayYard,LineType,Holding Capacity,YardCapType,BOX TYPE
+Eastern Yard 2,Marshalling Yard,Reception Line,58,Full,BOXN
+Eastern Yard 3 ,Marshalling Yard,Reception Line,58,Full,BOXN
+Eastern Yard 4 ,Marshalling Yard,Reception Line,58,Full,BOXN
+Centre Yard 1 ,Marshalling Yard,Despatch Line,46,Partial,BOXN
+Centre Yard 2 ,Marshalling Yard,Despatch Line,59,Full,BOXN
+Centre Yard 3 ,Marshalling Yard,Despatch Line,59,Full,BOXN
+Centre Yard 4 ,Marshalling Yard,Despatch Line,59,Full,BOXN
+Centre Yard 5 ,Marshalling Yard,Despatch Line,59,Full,BOXN
+Centre Yard 6 ,Marshalling Yard,Despatch Line,59,Full,BOXN
+Western Yard 1 ,Marshalling Yard,Despatch Line,59,Full,BOXN
+Sick Line,Marshalling Yard,Despatch Line,18,Partial,BOXN
+JD (E)Ml Loading Line 1,Marshalling Yard,Loading Lines,23,Partial,BOXN
+JD (E)Ml Loading Line 2,Marshalling Yard,Loading Lines,35,Partial,BOXN
+Eastern Yard I,Marshalling Yard,Loading Lines,58,Full,BOXN
+C1 Warehouse Line,Marshalling Yard,Loading Lines,29,Partial,BOXN
+Additional Yard Line,Marshalling Yard,Loading Lines,59,Full,BOXN
+Block Yard Line,Marshalling Yard,Loading Lines,59,Full,BOXN
+Loading Line Along Sq1 Road Jd(W),Marshalling Yard,Loading Lines,42,Partial,BCN
+JD Shed Lines,Marshalling Yard,Loading Lines,25,Partial,BOXN
+Shed Line I,Marshalling Yard,Loading Lines,25,Partial,BOXN
+Shed Line II,Marshalling Yard,Loading Lines,25,Partial,BOXN
+Transfer Line C2srj To B1srj,North & Centre Yard,Loading Lines,45,Full,BLC
+Container Handling Line         (Concor Line),North & Centre Yard,Loading Lines,45,Full,BLC
+MR Line II,North & Centre Yard,Loading Lines,15,Partial,BOXN
+MR Line III,North & Centre Yard,Loading Lines,15,Partial,BOXN
+CITPL Line – 1,CITPL Terminal,Loading Lines,45,Full,BLC
+CITPL Line – 2,CITPL Terminal,Loading Lines,45,Full,BLC
+,,,,,
+,,,,,

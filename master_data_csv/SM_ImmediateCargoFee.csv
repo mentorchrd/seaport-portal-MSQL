@@ -1,0 +1,13 @@
+﻿S_Type,Start_Date,End_Date,Rate_for_15_days,Area,SIM_UoM
+Open Space Unpaved,0,60,406,10,square meter
+Open Space Unpaved,61,90,446,10,square meter
+Open Space Unpaved,91,120,506,10,square meter
+Open Space Unpaved,121,999,607,10,square meter
+Open Space Paved,0,60,767,10,square meter
+Open Space Paved,61,90,845,10,square meter
+Open Space Paved,91,120,959,10,square meter
+Open Space Paved,121,999,1152,10,square meter
+Covered Space,0,60,1213,10,square meter
+Covered Space,61,90,1334,10,square meter
+Covered Space,91,120,1516,10,square meter
+Covered Space,121,999,1820,10,square meter

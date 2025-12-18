@@ -31,12 +31,290 @@ Add (for further instalments but not more than 10 instalments)
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Cargo Simulator</title>
-  <link rel="stylesheet" href="../style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Seaport Cargo Charges Simulator</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="../shared.css">
+  <style>
+    /* Override for cargo module - make mode selector radio buttons horizontal and properly spaced */
+    .mode-selector {
+      display: flex;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.2rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .mode-selector label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+    .mode-selector input[type="radio"] {
+      margin-right: 0.5rem;
+    }
+    
+  </style>
 </head>
 <body>
-  <h1>Cargo Simulator</h1>
-  <p>This is the Cargo Simulator page.</p>
-  <a href="../dashboard.html">Back to Dashboard</a>
+  <div class="header">
+    <h1>Cargo Module</h1>
+    <nav>
+      <a href="../dashboard.html">Home</a>
+      <a href="../vessel/index.html">Vessel</a>
+      <a href="../cargo/index.html" class="active">Cargo</a>
+      <a href="../stevedore/index.html">Stevedore</a>
+      <a href="../storage/index.html">Storage</a>
+      <a href="../rail/index.html">Railway</a>
+    </nav>
+  </div>
+  <div class="container">
+    <div class="main-grid">
+      <div class="form-card">
+        <h2>CARGO CHARGES</h2>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+          <label><input type="radio" name="cargoMode" value="cargo" checked> Cargo</label>
+          <label><input type="radio" name="cargoMode" value="container"> Container</label>
+        </div>
+
+        <!-- Cargo Mode Section -->
+        <div id="cargoModeSection">
+          <div class="form-section">
+            <h3>Cargo Details</h3>
+            <div class="form-group">
+              <label for="cargoName">Cargo Name</label>
+              <select id="cargoName">
+                <!-- Options populated dynamically -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cargoGroup">Cargo Category</label>
+              <input type="text" id="cargoGroup" disabled>
+            </div>
+            <div class="form-group">
+              <label for="weight">Weight of Cargo (Tons)</label>
+              <input type="number" id="weight" value="40000">
+            </div>
+            <div class="form-group">
+              <label for="tradeType">Trade Type</label>
+              <select id="tradeType">
+                <option>Foreign</option>
+                <option>Coastal</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="operationType">Operation Type</label>
+              <select id="operationType">
+                <option>import</option>
+                <option>export</option>
+                <option>both</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="storageType">Storage Type</label>
+              <select id="storageType">
+                <option>open</option>
+                <option>covered</option>
+                <option>any</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Vessel Details (for Berth Allocation)</h3>
+            <div class="form-group">
+              <label for="loa">Length Overall (LOA) m</label>
+              <input type="number" id="loa" value="200">
+            </div>
+            <div class="form-group">
+              <label for="draft">Draft (m)</label>
+              <input type="number" id="draft" value="10">
+            </div>
+            <div class="form-group">
+              <label for="beam">Beam (m)</label>
+              <input type="number" id="beam" value="30">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Demurrage Details</h3>
+            <div class="form-group">
+              <label for="daysAfterFree">Days after free period</label>
+              <input type="number" id="daysAfterFree" value="0">
+            </div>
+            <div class="form-group">
+              <label for="quantityDelivered">Quantity Delivered (Tons)</label>
+              <input type="number" id="quantityDelivered" value="40000">
+            </div>
+          </div>
+        </div>
+
+        <!-- Container Mode Section -->
+        <div id="containerModeSection" class="hidden">
+          <div class="form-section">
+            <h3>Container Details</h3>
+            <div class="form-group">
+              <label for="containerType">Container Type</label>
+              <select id="containerType">
+                <option>Standard</option>
+                <option>Shipper Own</option>
+                <option>MAFI</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="containerTradeType">Trade Type</label>
+              <select id="containerTradeType">
+                <option>Foreign</option>
+                <option>Coastal</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Standard/MAFI Container Inputs -->
+          <div id="standardContainerInputs">
+            <div class="form-section">
+              <h3>Up to 20 Feet</h3>
+              <div class="form-group">
+                <label for="container20Empty">Empty Containers</label>
+                <input type="number" id="container20Empty" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="container20Laden">Laden Containers</label>
+                <input type="number" id="container20Laden" value="0" min="0">
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>20-40 Feet</h3>
+              <div class="form-group">
+                <label for="container2040Empty">Empty Containers</label>
+                <input type="number" id="container2040Empty" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="container2040Laden">Laden Containers</label>
+                <input type="number" id="container2040Laden" value="0" min="0">
+              </div>
+            </div>
+
+            <div class="form-section">
+              <h3>Above 40 Feet</h3>
+              <div class="form-group">
+                <label for="container40PlusEmpty">Empty Containers</label>
+                <input type="number" id="container40PlusEmpty" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="container40PlusLaden">Laden Containers</label>
+                <input type="number" id="container40PlusLaden" value="0" min="0">
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipper Own Container Inputs -->
+          <div id="shipperOwnInputs" class="hidden">
+            <div class="form-section">
+              <h3>Cargo Value</h3>
+              <div class="form-group">
+                <label for="shipperOwnCargoValue">Total Cargo Value (INR)</label>
+                <input type="number" id="shipperOwnCargoValue" value="0" min="0">
+              </div>
+              <div class="form-group">
+                <label for="shipperOwnContainers">Total Containers</label>
+                <input type="number" id="shipperOwnContainers" value="0" min="0">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Vessel Details (for Berth Allocation)</h3>
+            <div class="form-group">
+              <label for="containerLoa">Length Overall (LOA) m</label>
+              <input type="number" id="containerLoa" value="200">
+            </div>
+            <div class="form-group">
+              <label for="containerDraft">Draft (m)</label>
+              <input type="number" id="containerDraft" value="10">
+            </div>
+            <div class="form-group">
+              <label for="containerBeam">Beam (m)</label>
+              <input type="number" id="containerBeam" value="30">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <h3>Demurrage Details</h3>
+            <div class="form-group">
+              <label for="containerDaysAfterFree">Days after free period</label>
+              <input type="number" id="containerDaysAfterFree" value="0">
+            </div>
+            <div class="form-group">
+              <label for="containerOperationType">Operation Type</label>
+              <select id="containerOperationType">
+                <option>import</option>
+                <option>export</option>
+                <option>both</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button class="btn btn-primary" id="calculateCostBtn">Calculate Cargo Charges</button>
+          <button class="btn btn-primary" id="calculateLogisticsBtn">Calculate Logistics</button>
+          <button class="btn btn-clear" id="clearBtn">Clear Form</button>
+        </div>
+      </div>
+
+      <div class="right-col" hidden id="resultsContainer">
+        <div id="costPanel" class="panel hidden">
+          <div class="section-title">Total Cargo Charges</div>
+          <div id="totalCostValue" class="cost-value">₹0</div>
+
+          <div class="section-title">Charges Breakdown</div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Wharfage:</span>
+            <span id="wharfageVal" class="breakdown-value">₹0</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Demurrage:</span>
+            <span id="demurrageVal" class="breakdown-value">₹0</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Sub-Total:</span>
+            <span id="subtotalVal" class="breakdown-value">₹0</span>
+          </div>
+          <div class="breakdown-item">
+            <span class="breakdown-label">Taxes (GST @ 18%):</span>
+            <span id="taxesVal" class="breakdown-value">₹0</span>
+          </div>
+
+          <div class="chart-container">
+            <canvas id="costChart"></canvas>
+          </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
+        </div>
+
+        <div id="logisticsPanel" class="panel hidden">
+          <div class="section-title">Operational Logistics</div>
+          
+          <div class="logistics-item">
+            <div class="logistics-item-label">Handling Time (hours)</div>
+            <div id="handlingHours" class="logistics-item-value">0</div>
+          </div>
+
+          <div class="logistics-item">
+            <div class="logistics-item-label">Eligible Berths</div>
+            <div id="berthsList" class="logistics-item-value">-</div>
+          </div>
+          <button class="btn btn-print" onclick="window.print()">Print Results</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="cargo.js"></script>
 </body>
 </html>

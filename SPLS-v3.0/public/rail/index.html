@@ -1,13 +1,177 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Rail Simulator</title>
-  <link rel="stylesheet" href="../style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Railway Module - Seaport Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../shared.css">
 </head>
 <body>
-  <h1>Rail Simulator</h1>
-  <p>This is the Rail Simulator page.</p>
-  <a href="../dashboard.html">Back to Dashboard</a>
+    <div class="header">
+        <h1>Railway Module</h1>
+        <nav>
+            <a href="../dashboard.html">Home</a>
+            <a href="../vessel/index.html">Vessel</a>
+            <a href="../cargo/index.html">Cargo</a>
+            <a href="../stevedore/index.html">Stevedore</a>
+            <a href="../storage/index.html">Storage</a>
+            <a href="index.html" class="active">Railway</a>
+        </nav>
+    </div>
+      
+    <div class="container">
+        <div class="main-grid">
+            <div class="form-card">
+                <!-- Cargo Type Selection -->
+                <section class="input-section">
+                    <h2>Cargo Type</h2>
+                    <div class="form-group">
+                        <label for="cargoType">Select Cargo Type:</label>
+                        <select id="cargoType">
+                            <option value="">Select Cargo Type...</option>
+                            <option value="Bagged Cargo">Bagged Cargo</option>
+                            <option value="Dry Bulk">Dry Bulk</option>
+                            <option value="Steel Cargo">Steel Cargo</option>
+                            <option value="Granite Blocks">Granite Blocks</option>
+                            <option value="Container">Container</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Wagon Type Selection -->
+                <section class="input-section">
+                    <h2>Wagon Details</h2>
+                    <div class="form-group">
+                        <label for="wagonType">Wagon Type:</label>
+                        <select id="wagonType">
+                            <option value="">Select Wagon Type...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="numWagons">Number of Wagons:</label>
+                        <input type="number" id="numWagons" min="1" value="40">
+                    </div>
+                </section>
+
+                <!-- Container Details (shown only for Container cargo) -->
+                <section class="input-section" id="containerSection" style="display: none;">
+                    <h2>Container Details</h2>
+                    <div class="container-grid">
+                        <div class="form-group">
+                            <label for="container20ft">20' Containers:</label>
+                            <input type="number" id="container20ft" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="container40ft">40' Containers:</label>
+                            <input type="number" id="container40ft" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="container40ftPlus">40'+ Containers:</label>
+                            <input type="number" id="container40ftPlus" min="0" value="0">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Cargo Weight (for non-container) -->
+                <section class="input-section" id="cargoWeightSection">
+                    <h2>Cargo Weight</h2>
+                    <div class="form-group">
+                        <label for="cargoWeight">Total Weight (tons):</label>
+                        <input type="number" id="cargoWeight" min="0" step="0.01" value="2000">
+                    </div>
+                </section>
+
+                <!-- Loading/Unloading Duration -->
+                <section class="input-section">
+                    <h2>Operation Duration</h2>
+                    <div class="form-group">
+                        <label for="operationHours">Total Hours for Loading/Unloading:</label>
+                        <input type="number" id="operationHours" min="0" step="0.1" value="10">
+                    </div>
+                </section>
+
+                <div class="button-group">
+                    <button id="calculateBtn_logi" class="btn btn-primary">Calculate Railway Logistics</button>
+                    <button id="calculateBtn_cost" class="btn btn-primary">Calculate Railway Cost</button>
+                    <button id="clearBtn" class="btn btn-clear">Clear Form</button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsContainer" class="right-panel" hidden>
+                <section class="results-section" id="results" style="display: none;">
+                    <h2>Railway Results</h2>
+                    
+                    <!-- Logistics Results -->
+                    <div class="result-card" id="logisticsResults" style="display: none;">
+                        <h3>Logistics</h3>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <span class="label">Suitable Railway Siding:</span>
+                                <span class="value" id="railwaySiding">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Siding Type:</span>
+                                <span class="value" id="sidingType">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Holding Capacity:</span>
+                                <span class="value" id="holdingCapacity">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Loading Type:</span>
+                                <span class="value" id="loadingType">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Rake Size:</span>
+                                <span class="value" id="rakeSize">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cost Results -->
+                    <div class="result-card" id="costResults" style="display: none;">
+                        <h3>Cost Summary</h3>
+                        <div class="result-grid">
+                            <div class="result-item">
+                                <span class="label">Haulage Charges:</span>
+                                <span class="value" id="haulageCharges">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Terminal Handling Charges:</span>
+                                <span class="value" id="terminalCharges">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Demurrage Charges:</span>
+                                <span class="value" id="demurrageCharges">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Free Hours:</span>
+                                <span class="value" id="freeHours">-</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="label">Chargeable Hours:</span>
+                                <span class="value" id="chargeableHours">-</span>
+                            </div>
+                            <div class="result-item total">
+                                <span class="label">Total Railway Cost:</span>
+                                <span class="value" id="totalCost">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div class="chart-container">
+                        <canvas id="railwayChart"></canvas>
+                    </div>
+                    <button class="btn btn-print" onclick="window.print()">Print Results</button>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script type="module" src="rail.js"></script>
 </body>
 </html>

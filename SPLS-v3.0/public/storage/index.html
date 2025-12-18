@@ -1,13 +1,230 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Storage Simulator</title>
-  <link rel="stylesheet" href="../style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Module - Seaport Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="../shared.css">
+    <style>
+        /* Override for storage module - make radio groups display horizontally */
+        .input-section .radio-group {
+            grid-column: 1 / -1;
+            display: flex;
+            flex-direction: row;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+    </style>
 </head>
 <body>
-  <h1>Storage Simulator</h1>
-  <p>This is the Storage Simulator page.</p>
-  <a href="../dashboard.html">Back to Dashboard</a>
+    <div class="header">
+        <h1>Storage Module</h1>
+        <nav>
+            <a href="../dashboard.html">Home</a>
+            <a href="../vessel/index.html">Vessel</a>
+            <a href="../cargo/index.html">Cargo</a>
+            <a href="../stevedore/index.html">Stevedore</a>
+            <a href="index.html" class="active">Storage</a>
+            <a href="../rail/index.html">Railway</a>
+        </nav>
+    </div>
+      
+    <div class="container">
+        <div class="main-grid">
+            <div class="form-card">
+                <!-- Storage Type Selection -->
+                <section class="input-section">
+                    <h2>Storage Type</h2>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="storageType" value="immediate" checked>
+                            <span>Immediate Cargo (15-180 days)</span>
+                        </label>
+                        <label>
+                            <input type="radio" name="storageType" value="lease">
+                            <span>Lease/License</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Cargo Type Selection -->
+                <section class="input-section">
+                    <h2>Cargo Type</h2>
+                    <div class="radio-group">
+                        <label>
+                            <input type="radio" name="cargoType" value="cargo" checked>
+                        <span>Cargo</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="cargoType" value="container">
+                        <span>Container</span>
+                    </label>
+                </div>
+            </section>
+
+            <!-- Cargo Input Fields -->
+            <section class="input-section" id="cargoInputs">
+                <h2>Cargo Details</h2>
+                <div class="form-group">
+                    <label for="cargoDescription">Cargo Description:</label>
+                    <select id="cargoDescription">
+                        <option value="">Select Cargo...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cargoWeight">Weight (tons):</label>
+                    <input type="number" id="cargoWeight" min="0" step="0.01" value="10000">
+                </div>
+            </section>
+
+            <!-- Container Input Fields -->
+            <section class="input-section" id="containerInputs" style="display: none;">
+                <h2>Container Details</h2>
+                <div class="container-grid">
+                    <div class="form-group">
+                        <label for="container20Empty">20' Empty:</label>
+                        <input type="number" id="container20Empty" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container20Laden">20' Laden:</label>
+                        <input type="number" id="container20Laden" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container2040Empty">20-40' Empty:</label>
+                        <input type="number" id="container2040Empty" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container2040Laden">20-40' Laden:</label>
+                        <input type="number" id="container2040Laden" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container40PlusEmpty">40'+ Empty:</label>
+                        <input type="number" id="container40PlusEmpty" min="0" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="container40PlusLaden">40'+ Laden:</label>
+                        <input type="number" id="container40PlusLaden" min="0" value="20">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Storage Duration -->
+            <section class="input-section" id="durationSection">
+                <h2>Storage Duration</h2>
+                <div class="form-group">
+                    <label for="storageDays">Days:</label>
+                    <input type="number" id="storageDays" min="0" value="45">
+                </div>
+            </section>
+
+            <!-- Lease Duration -->
+            <section class="input-section" id="leaseSection" style="display: none;">
+                <h2>Lease Duration</h2>
+                <div class="form-group">
+                    <label for="leaseMonths">Months:</label>
+                    <input type="number" id="leaseMonths" min="1" value="12">
+                </div>
+                <div class="form-group">
+                    <label for="leaseArea">Required Area (sq.m):</label>
+                    <input type="number" id="leaseArea" min="0" step="0.01" value="0" readonly>
+                </div>
+            </section>
+
+            <!-- Storage Area Type Selection (for immediate cargo) -->
+            <section class="input-section" id="areaTypeSection">
+                <h2>Storage Area Type</h2>
+                <div class="form-group">
+                    <label for="storageAreaType">Select Area Type:</label>
+                    <select id="storageAreaType">
+                        <option value="Open Space Unpaved">Open Space Unpaved</option>
+                        <option value="Open Space Paved">Open Space Paved</option>
+                        <option value="Covered Space">Covered Space</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Lease Type Selection -->
+            <section class="input-section" id="leaseTypeSection" style="display: none;">
+                <h2>Lease Type</h2>
+                <div class="form-group">
+                    <label for="leaseType">Select Lease Type:</label>
+                    <select id="leaseType">
+                        <option value="">Select Lease Type...</option>
+                    </select>
+                </div>
+            </section>
+
+            <div class="button-group">
+                <button id="calculateBtn_logi" class="btn btn-primary">Calculate Land Logistics</button>
+                <button id="calculateBtn_cost" class="btn btn-primary">Calculate Land Cost</button>
+                <button id="clearBtn" class="btn btn-clear">Clear Form</button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="right-panel" hidden id="resultsContainer">
+            <section class="results-section" id="results" style="display: none;">
+                <h2>Storage Results</h2>
+                <!-- Logistics Results -->
+                <div class="result-card" id="logisticsResults" style="display: none;">
+                    <h3>Logistics</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="label">Required Area:</span>
+                            <span class="value" id="requiredArea">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Storage Type:</span>
+                            <span class="value" id="suggestedStorage">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Stowage Factor:</span>
+                            <span class="value" id="stowageFactor">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Density:</span>
+                            <span class="value" id="density">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cost Results -->
+                <div class="result-card" id="costResults" style:="display: none;">
+                    <h3>Cost Summary</h3>
+                    <div class="result-grid">
+                        <div class="result-item">
+                            <span class="label">Storage Charges:</span>
+                            <span class="value" id="storageCharges">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Duration:</span>
+                            <span class="value" id="storageDuration">-</span>
+                        </div>
+                        <div class="result-item">
+                            <span class="label">Rate Applied:</span>
+                            <span class="value" id="rateApplied">-</span>
+                        </div>
+                        <div class="result-item total">
+                            <span class="label">Total Cost:</span>
+                            <span class="value" id="totalCost">-</span>
+                        </div>
+                        <!-- Chart -->
+                        <div class="chart-container">
+                            <canvas id="storageChart"></canvas>
+                        </div>
+                        <button class="btn btn-print" onclick="window.print()">Print Results</button>
+                    </div>
+                </div>
+
+                
+                </div>
+            </section>
+        </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script type="module" src="storage.js"></script>
 </body>
 </html>
