@@ -128,12 +128,12 @@ function setupEventListeners() {
             // Reset all inputs
             document.getElementById('cargoType').selectedIndex = 0;
             document.getElementById('wagonType').selectedIndex = 0;
-            document.getElementById('numWagons').value = '40';
+            document.getElementById('numWagons').value = '0';
             document.getElementById('container20ft').value = '0';
             document.getElementById('container40ft').value = '0';
             document.getElementById('container40ftPlus').value = '0';
-            document.getElementById('cargoWeight').value = '2000';
-            document.getElementById('operationHours').value = '10';
+            document.getElementById('cargoWeight').value = '0';
+            document.getElementById('operationHours').value = '0';
             
             // Hide results
             const resultsContainer = document.getElementById('resultsContainer');

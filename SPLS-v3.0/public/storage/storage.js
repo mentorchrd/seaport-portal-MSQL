@@ -134,7 +134,7 @@ function setupEventListeners() {
             
             // Reset all number inputs
             document.querySelectorAll('input[type="number"]').forEach(input => {
-                if(input.id === 'cargoWeight') input.value = '10000';
+                if(input.id === 'cargoWeight') input.value = '0';
                 else input.value = '0';
             });
             

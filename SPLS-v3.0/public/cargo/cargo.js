@@ -527,12 +527,12 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     clearBtn.addEventListener('click', ()=>{
       // Reset all form fields
       document.querySelectorAll('input[type="number"]').forEach(input => {
-        if(input.id === 'weight') input.value = '40000';
-        else if(input.id === 'loa') input.value = '200';
-        else if(input.id === 'draft') input.value = '10';
-        else if(input.id === 'beam') input.value = '30';
+        if(input.id === 'weight') input.value = '0';
+        else if(input.id === 'loa') input.value = '0';
+        else if(input.id === 'draft') input.value = '0';
+        else if(input.id === 'beam') input.value = '0';
         else if(input.id === 'daysAfterFree') input.value = '0';
-        else if(input.id === 'quantityDelivered') input.value = '40000';
+        else if(input.id === 'quantityDelivered') input.value = '0';
         else input.value = '0';
       });
       document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);

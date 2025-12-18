@@ -622,8 +622,8 @@ document.addEventListener('DOMContentLoaded', async ()=>{
     clearBtn.addEventListener('click', ()=>{
       // Reset all form fields
       document.querySelectorAll('input[type="number"]').forEach(input => {
-        if(input.id === 'weight') input.value = '10000';
-        else if(input.id === 'vesselTonnage') input.value = '5000';
+        if(input.id === 'weight') input.value = '0';
+        else if(input.id === 'vesselTonnage') input.value = '0';
         else input.value = '0';
       });
       document.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
